@@ -7,13 +7,13 @@ async function hashPassword(password) {
     return hashedPass
 }
 
-function comparePassword(password, hashedPassword) {
-    const isEqual = bcrypt.compare(password, hashedPassword)
+async function comparePassword(password, hashedPassword) {
+    const isEqual = await bcrypt.compare(password, hashedPassword)
     return isEqual
 }
 
 
-async function generateToken(payload, secret, options) {
+async function generateToken(payload, secret) {
     const generateToken = await jwt.sign(payload, secret, { expiresIn: "7d" })
     return generateToken
 }

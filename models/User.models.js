@@ -155,10 +155,7 @@ const userSchema = new mongoose.Schema({
     phone_number: {
         type: String,
         unique: true,
-        sparse: true,
-    },
-    countryCode: {
-        type: String,
+        sparse: true
     },
     isAdmin: {
         type: Boolean,
@@ -185,7 +182,7 @@ const userSchema = new mongoose.Schema({
     isPhoneVerified: {
         type: Boolean,
         default: false
-    }
+    },
 }, { timestamps: true })
 
 

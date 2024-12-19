@@ -38,6 +38,7 @@ function passportHandler() {
                         signUpBy: "Google", // Mark as signed up via Google,
                         token: "null",
                         phone_number: null,
+                        isEmailVerified: true
                     });
 
                     const token = await generateToken({ id: createuser._id, email: createuser.email }, process.env.JWT_SECRET)

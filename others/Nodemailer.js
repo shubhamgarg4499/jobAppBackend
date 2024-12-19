@@ -1,5 +1,5 @@
 require("dotenv").config()
-
+const nodemailer = require("nodemailer")
 
 const gmail = process.env.Gmail
 const GmailPassword = process.env.GmailPassword
