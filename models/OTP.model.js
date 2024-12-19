@@ -21,6 +21,10 @@ const otpSchema = new Schema({
         default: function () {
             return new Date(Date.now() + 2 * 60 * 1000)
         }
+    },
+    forgotPasswordOTP: {
+        type: String,
+        default: null
     }
 })
 

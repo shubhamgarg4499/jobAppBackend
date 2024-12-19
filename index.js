@@ -32,6 +32,7 @@ app.use('/auth/google', authRoute)
 
 // user routes
 const userRouter = require("./routes/UserProfile.routes")
+const { hashPassword } = require("./others/Extra.functions")
 app.use('/api/user', userRouter)
 
 

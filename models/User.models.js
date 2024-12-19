@@ -168,7 +168,6 @@ const userSchema = new mongoose.Schema({
     },
     token: {
         type: String,
-        required: true,
         sparse: true,
         unique: true
     },
@@ -191,10 +190,10 @@ userSchema.pre("save", async function (next) {
         if (!this.isModified("password")) {
             return next();
         }
-        this.password = hashPassword(this.password)
+        this.password = await hashPassword(this.password)
         return next();
     } catch (error) {
-        next(new ErrorHandler(error.status, error.message));
+        return next(new ErrorHandler(error.status, error));
     }
 });
 
