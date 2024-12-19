@@ -1,0 +1,14 @@
+PORT = 2020
+MONGODB_URL=mongodb://127.0.0.1:27017/JobApp
+
+# google login id and secret
+id = google console id
+secret = secret of google console
+# ///////
+
+JWT_SECRET =fdgh45tgbhj5ter24ehj
+
+
+
+Gmail= gmail here for otp
+GmailPassword = password of gmail
