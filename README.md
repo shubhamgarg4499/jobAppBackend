@@ -1,12 +1,12 @@
 # 1) User Login Through Email and Password
 
 - POST METHOD
-- URL api/user/signin
+- URL `api/user/signin`
 
 ### Parameters
 
-- email (string) (required)
-- password (string) (required)
+- `email (string) (required)`
+- `password (string) (required)`
 
 ### ERROR If any of the field missing
 
@@ -19,10 +19,10 @@
 
 ### Response (json response)
 
-- success: true
-- user (user details with token)
-- token
-- message :"User Login Successfully"
+- success: `true`
+- `user (user details with token)`
+- `token`
+- message :`User Login Successfully`
 
 ### ON ERROR
 
@@ -31,7 +31,7 @@
 # 2) User Login Through Google
 
 - Get METHOD
-- URL /auth/google
+- URL `/auth/google`
 
 ### Parameters
 
@@ -39,9 +39,8 @@
 
 ### Response
 
-- success: true
-- user (user details with token)
-- token
+- success: `true`
+- `user (user details with token)` -` token`
 
 ### ON ERROR
 
@@ -50,16 +49,16 @@
 # 3) Logout User
 
 - POST METHOD
-- URL /api/user/logout
+- URL `/api/user/logout`
 
 ### Parameters
 
-- ### token (In Header) (required)
+- ### `token (In Header) (required)`
 
 ### Response
 
-- success: true
-- message: "User Logged out Successfully"!
+- success: `true`
+- message: `User Logged out Successfully!`
 
 ### ON ERROR
 
