@@ -18,7 +18,10 @@ const passportHandler = require("./others/Passport.setup")
 app.use(passport.initialize())
 passportHandler()
 
-
+const { hashPassword, comparePassword } = require("./others/Extra.functions")
+// comparePassword("4sep2001", "$2b$10$GEgW0CregNwi95ZTWzWT1.Db9eibuK03AcHtXFB7V54BedAp5SXw2").then(e =>
+//     console.log(e)
+// )
 
 app.get("/", (req, res, next) => {
 
@@ -32,7 +35,6 @@ app.use('/auth/google', authRoute)
 
 // user routes
 const userRouter = require("./routes/UserProfile.routes")
-const { hashPassword } = require("./others/Extra.functions")
 app.use('/api/user', userRouter)
 
 

@@ -11,7 +11,6 @@ async function comparePassword(password, hashedPassword) {
     return isEqual
 }
 
-
 async function generateToken(payload, secret) {
     const generateToken = await jwt.sign(payload, secret, { expiresIn: "7d" })
     return generateToken

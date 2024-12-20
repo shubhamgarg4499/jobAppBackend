@@ -1,3 +1,4 @@
+const fs = require('fs');
 const otpModel = require("../models/OTP.model");
 const user = require("../models/User.models");
 const ErrorHandler = require("../others/ErrorHandler.class");
@@ -30,9 +31,9 @@ const createUser = async (req, res, next) => {
             }
         }
         // password hashing
-        const hashedPass = await hashPassword(password)
+        // const hashedPass = await hashPassword(password)
 
-        const createUser = await user.create({ fullName: fullName, password: hashedPass, email, signUpBy: "Email", token: "null", phone_number: mobilenumber })
+        const createUser = await user.create({ fullName: fullName, password, email, signUpBy: "Email", token: "null", phone_number: mobilenumber })
         // generate token
         const token = await generateToken({ _id: createUser._id }, JWT_SECRET)
         createUser.token = token
@@ -104,7 +105,6 @@ const sendOTP = async function (req, res, next) {
     }
 }
 
-
 const verifyOTP = async function (req, res, next) {
     try {
         const { otp, email } = req?.body
@@ -154,10 +154,10 @@ const verifyOTP = async function (req, res, next) {
     }
 }
 
-
 const SignIn = async function (req, res, next) {
     try {
         const { email, password } = req?.body
+        // console.log(email, password);
         // validate
         if (!email) { return next(new ErrorHandler(400, "Email Required!")) }
         if (!password) { return next(new ErrorHandler(400, "Password Required!")) }
@@ -170,7 +170,8 @@ const SignIn = async function (req, res, next) {
         if (findUser.signUpBy == "Google") next(new ErrorHandler(404, "Your Account Is Created With Google ! Please SignIn with Google"))
 
         // checking password
-        const isCorrectPassword = await comparePassword(password, findUser?.password)
+        const isCorrectPassword = await comparePassword(password, findUser.password)
+        // console.log(isCorrectPassword)
         if (!isCorrectPassword) { return next(new ErrorHandler(400, "Invalid Email or Password!")) }
 
         // generate token
@@ -236,6 +237,7 @@ const ForgotPasswordOTP = async function (req, res, next) {
         return next(new ErrorHandler(error.status, error))
     }
 }
+
 const verifyForgotPasswordOTP = async function (req, res, next) {
     try {
         const { otp, email } = req?.body
@@ -293,6 +295,226 @@ const changePassword = async function (req, res, next) {
     }
 }
 
+// controllers for user details
+
+const AboutMe = async (req, res, next) => {
+    try {
+        const { _id } = req?.user
+        const { description } = req?.body
+        if (!description) return next(new ErrorHandler(400, "Description Required*"))
+        const findUser = await user.findByIdAndUpdate(_id, { about: description }, { new: true })
+        res.status(200).json({ success: true, message: "About Section is Updated" })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
 
 
-module.exports = { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP } 
+const workExperience = async (req, res, next) => {
+    try {
+        const { _id } = req.user
+        const { jobInfo } = req?.body
+        if (typeof jobInfo != "object") {
+            return next(new ErrorHandler(400, "Only Allow `ARRAY OF OBJECT`"))
+        }
+        if (jobInfo.length < 1) {
+            return next(new ErrorHandler(400, "Need Atleast One Object To Add"))
+        }
+
+        if (jobInfo.some(element => {
+            return !(
+                element.jobTitle.trim() &&
+                element.company.trim() &&
+                element.startDate.trim()
+            );
+        })) {
+            return next(new ErrorHandler(400, "All fields (jobTitle, company, and startDate) must be filled in every entry."))
+
+        }
+        if (jobInfo.some(element => {
+            return !element.endDate && !element.stillWorkingThere
+        })) {
+            return next(new ErrorHandler(400, "Please Select End Date or Check if You are Still Working There"))
+
+        }
+        await user.findByIdAndUpdate(_id, {
+            $addToSet: {
+                experience: { $each: jobInfo }
+            }
+        })
+        res.status(200).json({ success: true, message: "Your Experience Section has been updated Successfully" })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+
+const AddEducation = async (req, res, next) => {
+    try {
+        const { _id } = req.user
+        const { educationInfo } = req?.body
+        if (typeof educationInfo != "object") {
+            return next(new ErrorHandler(400, "Only Allow `ARRAY OF OBJECT`"))
+        }
+        if (educationInfo.length < 1) {
+            return next(new ErrorHandler(400, "Need Atleast One Object To Add"))
+        }
+
+        if (educationInfo.some(element => {
+            return !(
+                element.education.trim() &&
+                element.institute.trim() &&
+                element.fieldOfStudy.trim() &&
+                element.startDate.trim()
+            );
+        })) {
+            return next(new ErrorHandler(400, "All fields (Education, Institute,Field Of Study and Start Date) must be filled in every entry."))
+
+        }
+        if (educationInfo.some(element => {
+            return !element.endDate && !element.stillPursuing
+        })) {
+            return next(new ErrorHandler(400, "Please Select End Date or Check if You are Still Pursuing It "))
+
+        }
+        await user.findByIdAndUpdate(_id, {
+            $addToSet: {
+                education: { $each: educationInfo }
+            }
+        });
+        res.status(200).json({ success: true, message: "Your Education Section has been updated Successfully" })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error))
+    }
+}
+
+
+const AddSkills = async (req, res, next) => {
+    try {
+        const { _id } = req.user
+        const { skill } = req.body
+        if (typeof skill != "object") {
+            return next(new ErrorHandler(400, "Only Allow `ARRAY`"))
+        }
+
+        if (skill.length < 1) return next(new ErrorHandler(400, "Atleast 1 Skill required to Add"))
+
+        // for (let element of skill) {
+        //     await user.findByIdAndUpdate(_id, {
+        //         $addToSet: {
+        //             skills: element
+        //         }
+        //     })
+        // }
+        await user.findByIdAndUpdate(_id, {
+            $addToSet: {
+                skills: { $each: skill }
+            }
+        });
+        res.status(200).json({ success: true, message: "Skills Section Updated" })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+const AddAppreciation = async (req, res, next) => {
+    try {
+        const { _id } = req.user
+        const { appre } = req?.body
+        if (typeof appre != "object") {
+            return next(new ErrorHandler(400, "Only Allow `ARRAY OF OBJECT`"))
+        }
+        if (appre.length < 1) {
+            return next(new ErrorHandler(400, "Need Atleast One Object To Add"))
+        }
+
+        if (appre.some(element => {
+            return !(
+                element.awardName.trim() &&
+                element.category.trim() &&
+                element.year.trim()
+            );
+        })) {
+            return next(new ErrorHandler(400, "Fields (Award Name, Category & Year) must be filled."))
+
+        }
+        await user.findByIdAndUpdate(_id, {
+            $addToSet: {
+                appreciation: { $each: appre }
+            }
+        });
+        res.status(200).json({ success: true, message: "Your Appreciation Section has been updated Successfully" })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+
+const AddLanguage = async (req, res, next) => {
+    try {
+        const { _id } = req.user
+        const { langKnown } = req?.body
+
+        if (typeof langKnown != "object") {
+            return next(new ErrorHandler(400, "Only Allow `ARRAY OF OBJECT`"))
+        }
+
+        if (langKnown.length < 1) {
+            return next(new ErrorHandler(400, "Need Atleast One Object To Add"))
+        }
+
+        if (langKnown.some(element => {
+            return !(
+                element.languageName.trim() &&
+                element.oralLevel.trim() &&
+                element.writtenLevel.trim()
+            );
+        })) {
+            return next(new ErrorHandler(400, "Fields (Language Name, Oral Level & Written Level) must be filled."))
+        }
+
+        await user.findByIdAndUpdate(_id, {
+            $addToSet: {
+                language: { $each: langKnown }
+            }
+        });
+
+        res.status(200).json({ success: true, message: "Your Language Section has been updated Successfully" })
+
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+
+const uploadResume = async (req, res, next) => {
+    try {
+        const { _id } = req.user
+        const userResume = req?.file
+
+        // check given file is pdf or not
+        if (userResume.originalname.split(".")[1] !== "pdf") {
+            fs.unlink(userResume.path, (error) => {
+                if (error) return next(new ErrorHandler(400, error.message))
+            })
+            return next(new ErrorHandler(400, "Only PDF File Allowed"))
+        }
+
+        // checking user previous resume and delete it 
+        const findUser = await user.findById(_id)
+        if (findUser.resume) {
+            fs.unlink(findUser.resume, (error) => {
+                if (error) return next(new ErrorHandler(400, error.message))
+            })
+        }
+        const findAndUpdateUser = await user.findByIdAndUpdate(_id, { resume: userResume.path }, { new: true })
+
+        res.status(200).json({ message: "Resume Updated Successfully", success: true, resume: findAndUpdateUser.resume })
+
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+
+module.exports = { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, AboutMe, workExperience, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume } 

@@ -28,13 +28,10 @@ const workExperience = new mongoose.Schema({
     company: {
         type: String
     },
-    zipCode: {
-        type: String
-    },
     startDate: {
         type: String
     },
-    EndDate: {
+    endDate: {
         type: String
     },
     stillWorkingThere: {
@@ -53,13 +50,13 @@ const Education = new mongoose.Schema({
     institute: {
         type: String
     },
-    fieldOfSudy: {
+    fieldOfStudy: {
         type: String
     },
     startDate: {
         type: String
     },
-    EndDate: {
+    endDate: {
         type: String
     },
     stillPursuing: {
@@ -75,13 +72,19 @@ const LanguageKnown = new mongoose.Schema({
     languageName: {
         type: String
     },
-    oral: {
+    oralLevel: {
         type: String,
-        enum: ["Beginner", "Intermediate", "Advanced"]
+        enum: {
+            values: ["Beginner", "Intermediate", "Advanced"],
+            message: "{VALUE} is not a valid oral level."
+        }
     },
-    Written: {
+    writtenLevel: {
         type: String,
-        enum: ["Beginner", "Intermediate", "Advanced"]
+        enum: {
+            values: ["Beginner", "Intermediate", "Advanced"],
+            message: "{VALUE} is not a valid oral level."
+        }
     },
     primaryLanguage: {
         type: Boolean,
@@ -117,10 +120,10 @@ const userSchema = new mongoose.Schema({
         type: String
     },
     experience: {
-        type: [{ workExperience }]
+        type: [workExperience]
     },
     education: {
-        type: [{ Education }]
+        type: [Education]
     },
     skills: {
         type: [String]
@@ -190,8 +193,10 @@ userSchema.pre("save", async function (next) {
         if (!this.isModified("password")) {
             return next();
         }
+        // console.log(this.password);
         this.password = await hashPassword(this.password)
-        return next();
+        // console.log(this.password);
+        next();
     } catch (error) {
         return next(new ErrorHandler(error.status, error));
     }
