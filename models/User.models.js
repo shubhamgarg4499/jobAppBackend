@@ -158,7 +158,8 @@ const userSchema = new mongoose.Schema({
     phone_number: {
         type: String,
         unique: true,
-        sparse: true
+        sparse: true,
+        default: ""
     },
     isAdmin: {
         type: Boolean,
@@ -185,6 +186,25 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    approval: {
+        type: String,
+        enum: ["approved", "pending", "rejected"],
+        default: "pending",
+        required: true,
+        lowercase: true
+    },
+    documents: {
+        type: [{
+            documentName: {
+                type: String,
+                required: true
+            },
+            documentPhoto: {
+                type: String,
+                required: true
+            }
+        }]
+    }
 }, { timestamps: true })
 
 

@@ -24,7 +24,6 @@ const { hashPassword, comparePassword } = require("./others/Extra.functions")
 // )
 
 app.get("/", (req, res, next) => {
-
     res.send(`<a href="/auth/google">Login</a>`)
 })
 
@@ -37,7 +36,9 @@ app.use('/auth/google', authRoute)
 const userRouter = require("./routes/UserProfile.routes")
 app.use('/api/user', userRouter)
 
-
+// job routes
+const jobRouter = require("./routes/Job.routes")
+app.use("/api/job", jobRouter)
 
 
 app.listen(port, () => {
