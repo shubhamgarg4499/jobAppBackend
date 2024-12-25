@@ -1,3 +1,5 @@
+
+const os = require("os")
 const express = require("express")
 const ErrorMiddleware = require("./middleswares/Error.middleware")
 const ErrorHandler = require("./others/ErrorHandler.class")
@@ -7,7 +9,6 @@ require("dotenv").config()
 const port = process.env.PORT || 5000
 const cors = require("cors")
 app.use(cors())
-
 const connectDB = require("./others/ConnectDB")
 connectDB()
 
@@ -41,8 +42,28 @@ const jobRouter = require("./routes/Job.routes")
 app.use("/api/job", jobRouter)
 
 
+
+
+function getLocalIPAddress() {
+    const interfaces = os.networkInterfaces();
+    for (let interfaceName in interfaces) {
+        for (let iface of interfaces[interfaceName]) {
+            // Check if the interface is an IPv4 address and not a loopback
+            if (iface.family === 'IPv4' && !iface.internal) {
+                return iface.address;
+            }
+        }
+    }
+    return '127.0.0.1'; // Fallback to localhost
+}
+
+// Get the local IP address
+const localIP = getLocalIPAddress();
+// const port = process.env.PORT || 5000
 app.listen(port, () => {
-    console.log(port);
+    // Complete URL (protocol + IP address + port)
+    const completeURL = `http://${localIP}:${port}`;
+    console.log('Complete url: ', completeURL);
 })
 
 app.use(ErrorMiddleware)

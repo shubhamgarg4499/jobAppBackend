@@ -27,9 +27,9 @@ function passportHandler() {
         async function (req, accessToken, refreshToken, profile, done) {
             let data = req.query.state
             let { userType } = JSON.parse(data)
+            let User = await user.findOne({ email: profile._json.email });
             try {
                 // Check if the user already exists
-                let User = await user.findOne({ email: profile._json.email });
 
                 if (!User) {
                     // If the user doesn't exist, create a new user
@@ -54,7 +54,7 @@ function passportHandler() {
                 }
 
                 // Create a JWT token
-
+                if (User.userType !== userType.toLowerCase()) { return done(new ErrorHandler(404, "Profile Error! Cant Sign In")) }
                 const token = await generateToken({ id: User._id, email: User.email },
                     process.env.JWT_SECRET)
 

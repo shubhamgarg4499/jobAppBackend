@@ -160,16 +160,18 @@ const verifyOTP = async function (req, res, next) {
 
 const SignIn = async function (req, res, next) {
     try {
-        const { email, password } = req?.body
+        const { email, password, userType } = req?.body
         // console.log(email, password);
         // validate
         if (!email) { return next(new ErrorHandler(400, "Email Required!")) }
         if (!password) { return next(new ErrorHandler(400, "Password Required!")) }
+        if (!userType) { return next(new ErrorHandler(400, "User Type / Account Type Required")) }
 
         // find user by given email
         const findUser = await user.findOne({ email })
 
         // validate user
+        if (findUser.userType !== userType.toLowerCase()) { return next(new ErrorHandler(404, "Profile Error! Cant Sign In")) }
         if (!findUser) { return next(new ErrorHandler(404, "User Not Found! Please SignUp")) }
         if (findUser.signUpBy == "Google") next(new ErrorHandler(404, "Your Account Is Created With Google ! Please SignIn with Google"))
 
