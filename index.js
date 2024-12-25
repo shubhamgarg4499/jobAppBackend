@@ -1,3 +1,5 @@
+
+const os = require("os")
 const express = require("express")
 const os = require('os');
 const ErrorMiddleware = require("./middleswares/Error.middleware")
@@ -13,7 +15,6 @@ require("dotenv").config()
 
 const cors = require("cors")
 app.use(cors())
-
 const connectDB = require("./others/ConnectDB")
 connectDB()
 
@@ -27,17 +28,22 @@ passportHandler()
 const { hashPassword, comparePassword } = require("./others/Extra.functions")
 
 app.get("/", (req, res, next) => {
-
     res.send(`<a href="/auth/google">Login</a>`)
 })
 app.use('/auth/google', authRoute)
 app.use('/api/user', userRouter)
 
+// job routes
+const jobRouter = require("./routes/Job.routes")
+app.use("/api/job", jobRouter)
 
 
 
 
+<<<<<<< HEAD
 // Function to get local IP address (non-127.0.0.1 IP)
+=======
+>>>>>>> 0e01505c9cb2ee6fee433b0dc5932ec98d433eee
 function getLocalIPAddress() {
     const interfaces = os.networkInterfaces();
     for (let interfaceName in interfaces) {
@@ -53,11 +59,19 @@ function getLocalIPAddress() {
 
 // Get the local IP address
 const localIP = getLocalIPAddress();
+<<<<<<< HEAD
 const port = process.env.PORT || 5000
 app.listen(port, () => {
      // Complete URL (protocol + IP address + port)
      const completeURL = `http://${localIP}:${port}`;
      console.log('Complete url: ', completeURL);
+=======
+// const port = process.env.PORT || 5000
+app.listen(port, () => {
+    // Complete URL (protocol + IP address + port)
+    const completeURL = `http://${localIP}:${port}`;
+    console.log('Complete url: ', completeURL);
+>>>>>>> 0e01505c9cb2ee6fee433b0dc5932ec98d433eee
 })
 
 app.use(ErrorMiddleware)

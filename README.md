@@ -31,11 +31,12 @@
 # 2) User Login Through Google
 
 - Get METHOD
-- URL `/auth/google`
+- URL `/auth/google?userType=jobseeker`
 
-### Parameters
+### Query Parameters
 
-- None
+- userType=jobseeker
+- userType=employer
 
 ### Response
 
@@ -127,6 +128,8 @@
 - `fullName (string) (required)`
 - `email (string) (required)`
 - `password (string) (required)`
+- `notification (Boolean) (optional) (by default false)`
+- `userType (String) (required) ["jobseeker","employer"]`
 - ### `mobilenumber (string) (optional)`
 
 ### ERROR

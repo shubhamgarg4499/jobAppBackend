@@ -7,7 +7,14 @@ const user = require("../models/User.models");
 const authRoute = express.Router()
 
 // google login
-authRoute.route('/').get(passport.authenticate('google', { scope: ["profile", "email"], session: false }));
+authRoute.route('/').get((req, res, next) => {
+    const userType = req.query.userType; // Extract userType from the query
+    passport.authenticate('google', {
+        scope: ["profile", "email"],
+        session: false,
+        state: JSON.stringify({ userType }) // Pass userType securely in the state
+    })(req, res, next);
+});
 
 
 authRoute.route('/callback').get(passport.authenticate('google', { failureRedirect: '/', session: false }), (req, res) => {

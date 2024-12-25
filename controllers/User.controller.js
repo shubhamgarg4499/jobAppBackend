@@ -8,9 +8,12 @@ const sendMail = require("../others/Nodemailer");
 require("dotenv").config()
 
 const JWT_SECRET = process.env.JWT_SECRET
+
+
+// need to add documents
 const createUser = async (req, res, next) => {
     try {
-        let { fullName, email, password, mobilenumber } = req?.body
+        let { fullName, email, password, mobilenumber, userType, notification = false } = req?.body
 
         if (!mobilenumber) {
             mobilenumber = null
@@ -19,6 +22,7 @@ const createUser = async (req, res, next) => {
         if (!email) return next(ErrorHandler(400, "Email field is required"));
         if (!fullName) return next(ErrorHandler(400, "Full Name field is required"));
         if (!password) return next(ErrorHandler(400, "Password field is required"));
+        if (!userType) return next(ErrorHandler(400, "User Type/Account Type is Required"));
 
 
         // Check for existing user
@@ -33,7 +37,7 @@ const createUser = async (req, res, next) => {
         // password hashing
         // const hashedPass = await hashPassword(password)
 
-        const createUser = await user.create({ fullName: fullName, password, email, signUpBy: "Email", token: "null", phone_number: mobilenumber })
+        const createUser = await user.create({ fullName: fullName, password, email, signUpBy: "Email", token: "null", phone_number: mobilenumber, userType, notification })
         // generate token
         const token = await generateToken({ _id: createUser._id }, JWT_SECRET)
         createUser.token = token
@@ -156,16 +160,18 @@ const verifyOTP = async function (req, res, next) {
 
 const SignIn = async function (req, res, next) {
     try {
-        const { email, password } = req?.body
+        const { email, password, userType } = req?.body
         // console.log(email, password);
         // validate
         if (!email) { return next(new ErrorHandler(400, "Email Required!")) }
         if (!password) { return next(new ErrorHandler(400, "Password Required!")) }
+        if (!userType) { return next(new ErrorHandler(400, "User Type / Account Type Required")) }
 
         // find user by given email
         const findUser = await user.findOne({ email })
 
         // validate user
+        if (findUser.userType !== userType.toLowerCase()) { return next(new ErrorHandler(404, "Profile Error! Cant Sign In")) }
         if (!findUser) { return next(new ErrorHandler(404, "User Not Found! Please SignUp")) }
         if (findUser.signUpBy == "Google") next(new ErrorHandler(404, "Your Account Is Created With Google ! Please SignIn with Google"))
 
