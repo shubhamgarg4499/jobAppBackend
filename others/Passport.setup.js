@@ -22,9 +22,11 @@ function passportHandler() {
             clientSecret: CLIENT_SECRET_LOCAL, // Use your actual client secret
             callbackURL: "/auth/google/callback",
             scope: ["profile", "email"], // Requesting access to basic profile and email
+            passReqToCallback: true
         },
-        async function (accessToken, refreshToken, profile, done) {
-
+        async function (req, accessToken, refreshToken, profile, done) {
+            let data = req.query.state
+            let { userType } = JSON.parse(data)
             try {
                 // Check if the user already exists
                 let User = await user.findOne({ email: profile._json.email });
@@ -37,8 +39,8 @@ function passportHandler() {
                         profile_picture: profile?._json.picture,
                         signUpBy: "Google", // Mark as signed up via Google,
                         token: null,
-                        phone_number: null,
-                        isEmailVerified: true
+                        isEmailVerified: true,
+                        userType
                     });
 
                     const token = await generateToken({ id: createuser._id, email: createuser.email }, process.env.JWT_SECRET)

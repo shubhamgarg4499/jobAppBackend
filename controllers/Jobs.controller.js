@@ -149,5 +149,28 @@ const applicationApprovalList = async (req, res, next) => {
         return next(new ErrorHandler(error.status, error.message))
     }
 }
-// need to add documents
+
+const userList = async (req, res, next) => {
+    try {
+        const { page, limit, name, email, profile } = req?.query
+
+        let skip = (page - 1) * limit
+
+        let pipeline = []
+
+        if (name) {
+            pipeline.push({
+                $match: {
+                    fullName: { $regex: name, $options: "i" }
+                }
+            })
+        }
+
+
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+
 module.exports = { createJob, getJob, applicationApprovalList }

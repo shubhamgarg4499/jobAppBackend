@@ -157,7 +157,7 @@ const userSchema = new mongoose.Schema({
     },
     phone_number: {
         type: String,
-        unique: true,
+        // unique: true,
         sparse: true,
         default: ""
     },
@@ -204,6 +204,16 @@ const userSchema = new mongoose.Schema({
                 required: true
             }
         }]
+    },
+    notification: {
+        type: Boolean,
+        default: false
+    },
+    userType: {
+        type: String,
+        enum: ["employer", "jobseeker"],
+        lowercase: true,
+        required: true
     }
 }, { timestamps: true })
 
