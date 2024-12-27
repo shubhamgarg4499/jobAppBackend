@@ -2,6 +2,8 @@ const { job } = require("../models/Jobs.model");
 const user = require("../models/User.models");
 const ErrorHandler = require("../others/ErrorHandler.class");
 const mongoose = require("mongoose");
+
+
 const createJob = async (req, res, next) => {
     try {
         const { _id } = req.user
@@ -127,7 +129,6 @@ const getJob = async (req, res, next) => {
     }
 }
 
-
 const applicationApprovalList = async (req, res, next) => {
     try {
         const { limit, page } = req?.query
@@ -152,7 +153,7 @@ const applicationApprovalList = async (req, res, next) => {
 
 const userList = async (req, res, next) => {
     try {
-        const { page, limit, name, email, profile } = req?.query
+        const { page, limit = 20, name, email, userType, isEmailVerified, isAdmin } = req?.query
 
         let skip = (page - 1) * limit
 
@@ -166,11 +167,129 @@ const userList = async (req, res, next) => {
             })
         }
 
+        if (email) {
+            pipeline.push({
+                $match: {
+                    email: { $regex: email, $options: "i" }
+                }
+            })
+        }
+        if (userType) {
+            pipeline.push({
+                $match: {
+                    userType: { $regex: userType, $options: "i" }
+                }
+            })
+        }
+        if (isEmailVerified && isEmailVerified !== "undefined") {
+            pipeline.push({
+                $match: {
+                    isEmailVerified: true
+                }
+            })
+        }
+        if (isAdmin && isAdmin !== "undefined") {
+            pipeline.push({
+                $match: {
+                    isAdmin: true
+                }
+            })
+        }
 
+        if (limit) {
+            pipeline.push({
+                $limit: Number(limit)
+            })
+        }
+
+        if (limit && page) {
+            pipeline.push({
+                $skip: Number(skip)
+            })
+        }
+        pipeline.push({
+            $match: {
+                isBlocked: false
+            }
+        })
+        const findUser = await user.aggregate(pipeline)
+        res.status(200).json({ users: findUser })
     } catch (error) {
         return next(new ErrorHandler(error.status, error.message))
     }
 }
 
 
-module.exports = { createJob, getJob, applicationApprovalList }
+
+const jobsPerMonth = async (req, res, next) => {
+    try {
+        const alljobs = await job.aggregate([
+            {
+                $addFields: {
+                    createdAt: { $toDate: "$createdAt" } // Convert to Date if it's a timestamp
+                }
+            },
+            {
+                $project: {
+                    month: { $month: "$createdAt" },
+                    year: { $year: "$createdAt" }
+                }
+            },
+            {
+                $group: {
+                    _id: { year: "$year", month: "$month" },
+                    jobCount: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { "_id.year": 1, "_id.month": 1 }
+            }
+        ]);
+
+        console.log(alljobs);
+        res.send(alljobs)
+
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+const jobsPerDay = async (req, res, next) => {
+    try {
+        const dayStart = new Date()
+        dayStart.setHours(0, 0, 0, 0)
+        const dayEnd = new Date()
+        dayEnd.setHours(23, 59, 59, 999)
+
+        const jobs = await job.find({
+            createdAt: { $gte: dayStart, $lt: dayEnd }
+        })
+        res.send(jobs)
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+
+const ActivejobsPerDay = async (req, res, next) => {
+    try {
+
+        const jobs = await job.find({ jobStatus: "active" })
+        res.send(jobs)
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+
+const deleteJobById = async (req, res, next) => {
+    try {
+        const { jobid } = req.query
+        if (!jobid) return next(new ErrorHandler(404, "User ID not found!"))
+        const findAndDlt = await job.findByIdAndDelete(jobid)
+        res.status(200).json({ message: "Deleted SuccessFully" })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+module.exports = { createJob, getJob, applicationApprovalList, userList, jobsPerMonth, jobsPerDay, ActivejobsPerDay, deleteJobById }

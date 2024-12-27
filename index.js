@@ -8,7 +8,10 @@ app.use(express.json())
 require("dotenv").config()
 const port = process.env.PORT || 5000
 const cors = require("cors")
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:5173', // Allow your React app
+    credentials: true,
+}))
 const connectDB = require("./others/ConnectDB")
 connectDB()
 
@@ -34,7 +37,7 @@ const authRoute = require("./routes/GoogleAuth.routes")
 app.use('/auth/google', authRoute)
 
 // user routes
-const userRouter = require("./routes/UserProfile.routes")
+const userRouter = require("./routes/User.routes")
 app.use('/api/user', userRouter)
 
 // job routes

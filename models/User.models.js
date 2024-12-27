@@ -108,7 +108,16 @@ const Appreciation = new mongoose.Schema({
         type: String
     }
 })
-
+const addDocs = new mongoose.Schema({
+    documentName: {
+        type: String,
+        required: true
+    },
+    documentPhoto: {
+        type: String,
+        required: true
+    }
+})
 
 const userSchema = new mongoose.Schema({
     fullName: {
@@ -194,16 +203,7 @@ const userSchema = new mongoose.Schema({
         lowercase: true
     },
     documents: {
-        type: [{
-            documentName: {
-                type: String,
-                required: true
-            },
-            documentPhoto: {
-                type: String,
-                required: true
-            }
-        }]
+        type: [addDocs]
     },
     notification: {
         type: Boolean,
@@ -214,6 +214,10 @@ const userSchema = new mongoose.Schema({
         enum: ["employer", "jobseeker"],
         lowercase: true,
         required: true
+    },
+    isBlocked: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 

@@ -1,5 +1,7 @@
 const express = require("express");
-const { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, workExperience, AboutMe, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume } = require("../controllers/User.controller");
+const { userList } = require("../controllers/Jobs.controller");
+const { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, workExperience, AboutMe, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume, addDocuments, approveUser, blockUser, userJoinedToday, loginWithToken } = require("../controllers/User.controller");
+const isAdmin = require("../middleswares/isAdmin");
 const userRouter = express.Router()
 const verifyTokenMiddleware = require("../middleswares/verifyJWT.middlewares");
 const upload = require("../others/Multer.setup");
@@ -24,5 +26,13 @@ userRouter.route("/addskills").post(verifyTokenMiddleware, AddSkills)
 userRouter.route("/addappreciation").post(verifyTokenMiddleware, AddAppreciation)
 userRouter.route("/addlanguage").post(verifyTokenMiddleware, AddLanguage)
 userRouter.route("/uploadresume").post(verifyTokenMiddleware, upload.single("resume"), uploadResume)
+userRouter.route("/adddocuments").post(verifyTokenMiddleware, upload.array("documents", 4), addDocuments)
+
+userRouter.route("/userlist").post(verifyTokenMiddleware, isAdmin, userList)
+userRouter.route("/approveuser").post(verifyTokenMiddleware, isAdmin, approveUser)
+userRouter.route("/blockuser").post(verifyTokenMiddleware, isAdmin, blockUser)
+userRouter.route("/userjoinedtoday").post(verifyTokenMiddleware, isAdmin, userJoinedToday)
+userRouter.route("/loginwithtoken").post(verifyTokenMiddleware, loginWithToken)
+
 
 module.exports = userRouter
