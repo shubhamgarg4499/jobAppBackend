@@ -594,6 +594,38 @@ const userJoinedToday = async (req, res, next) => {
     }
 }
 
+const userPerMonth = async (req, res, next) => {
+    try {
+        const allUsers = await user.aggregate([
+            {
+                $addFields: {
+                    createdAt: { $toDate: "$createdAt" } // Convert to Date if it's a timestamp
+                }
+            },
+            {
+                $project: {
+                    month: { $month: "$createdAt" },
+                    year: { $year: "$createdAt" }
+                }
+            },
+            {
+                $group: {
+                    _id: { year: "$year", month: "$month" },
+                    userCount: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { "_id.year": 1, "_id.month": 1 }
+            }
+        ]);
+
+        // console.log(v);
+        res.send(allUsers)
+
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
 
 // for keep user login until user have valid token
 const loginWithToken = async (req, res, next) => {
@@ -607,4 +639,4 @@ const loginWithToken = async (req, res, next) => {
         return next(new ErrorHandler(error.status, error.message))
     }
 }
-module.exports = { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, AboutMe, workExperience, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume, addDocuments, approveUser, blockUser, userJoinedToday, loginWithToken } 
+module.exports = { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, AboutMe, workExperience, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume, addDocuments, approveUser, blockUser, userJoinedToday, loginWithToken, userPerMonth } 

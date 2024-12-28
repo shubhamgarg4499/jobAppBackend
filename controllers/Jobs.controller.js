@@ -246,7 +246,7 @@ const jobsPerMonth = async (req, res, next) => {
             }
         ]);
 
-        console.log(alljobs);
+        // console.log(alljobs);
         res.send(alljobs)
 
     } catch (error) {
@@ -261,10 +261,10 @@ const jobsPerDay = async (req, res, next) => {
         const dayEnd = new Date()
         dayEnd.setHours(23, 59, 59, 999)
 
-        const jobs = await job.find({
+        const jobs = await job.countDocuments({
             createdAt: { $gte: dayStart, $lt: dayEnd }
         })
-        res.send(jobs)
+        res.send({ count: jobs })
     } catch (error) {
         return next(new ErrorHandler(error.status, error.message))
     }
