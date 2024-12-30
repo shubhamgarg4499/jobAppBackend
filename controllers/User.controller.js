@@ -161,6 +161,7 @@ const verifyOTP = async function (req, res, next) {
 const SignIn = async function (req, res, next) {
     try {
         const { email, password, userType } = req?.body
+        console.log(userType);
         // console.log(email, password);
         // validate
         if (!email) { return next(new ErrorHandler(400, "Email Required!")) }
@@ -169,7 +170,7 @@ const SignIn = async function (req, res, next) {
 
         // find user by given email
         const findUser = await user.findOne({ email })
-
+        if (!findUser) { return next(new ErrorHandler(404, "Invalid Email / Password")) }
         // validate user
         if (findUser.userType !== userType.toLowerCase()) { return next(new ErrorHandler(404, "Profile Error! Cant Sign In")) }
         if (!findUser) { return next(new ErrorHandler(404, "User Not Found! Please SignUp")) }
@@ -576,6 +577,16 @@ const blockUser = async (req, res, next) => {
         return next(new ErrorHandler(error.status, error.message))
     }
 }
+const UnblockUser = async (req, res, next) => {
+    try {
+        const { id } = req.query
+        if (!id) return next(new ErrorHandler(404, "User ID not Found!"))
+        await user.findByIdAndUpdate(id, { isBlocked: false }, { new: true })
+        res.status(200).json({ message: "User Unblocked Successfuly", success: true })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
 
 
 const userJoinedToday = async (req, res, next) => {
@@ -639,4 +650,4 @@ const loginWithToken = async (req, res, next) => {
         return next(new ErrorHandler(error.status, error.message))
     }
 }
-module.exports = { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, AboutMe, workExperience, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume, addDocuments, approveUser, blockUser, userJoinedToday, loginWithToken, userPerMonth } 
+module.exports = { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, AboutMe, workExperience, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume, addDocuments, approveUser, blockUser, userJoinedToday, loginWithToken, userPerMonth, UnblockUser } 

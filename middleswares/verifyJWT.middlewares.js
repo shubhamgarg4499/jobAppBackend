@@ -14,7 +14,7 @@ const verifyTokenMiddleware = async (req, res, next) => {
         if (decoded) {
             const findUser = await user.findOne({ token })
             if (!findUser) return next(new ErrorHandler(401, "Token expired or Wrong token"))
-            if (findUser.isBlocked) return next(new ErrorHandler(401, "You are blocked You cant access this app"))
+            if (findUser.isBlocked) return next(new ErrorHandler(401, "You are blocked You can't Perform Actions"))
             req.user = findUser
             next()
         }

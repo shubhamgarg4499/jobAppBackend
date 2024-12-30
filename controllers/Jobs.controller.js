@@ -131,6 +131,7 @@ const getJob = async (req, res, next) => {
 
 const applicationApprovalList = async (req, res, next) => {
     try {
+        const { email } = req.user
         const { limit, page } = req?.query
         let skip = (Number(page) - 1) * Number(limit)
         let pipeline = [{
@@ -153,7 +154,7 @@ const applicationApprovalList = async (req, res, next) => {
 
 const userList = async (req, res, next) => {
     try {
-        const { page, limit = 20, name, email, userType, isEmailVerified, isAdmin } = req?.query
+        const { page, limit = 20, name, email, userType, isEmailVerified, isAdmin, userStatus } = req?.query
 
         let skip = (page - 1) * limit
 
@@ -195,7 +196,13 @@ const userList = async (req, res, next) => {
                 }
             })
         }
-
+        if (userStatus === true || userStatus === false) {
+            pipeline.push({
+                $match: {
+                    isBlocked: userStatus
+                }
+            })
+        }
         if (limit) {
             pipeline.push({
                 $limit: Number(limit)
@@ -207,11 +214,7 @@ const userList = async (req, res, next) => {
                 $skip: Number(skip)
             })
         }
-        pipeline.push({
-            $match: {
-                isBlocked: false
-            }
-        })
+
         const findUser = await user.aggregate(pipeline)
         res.status(200).json({ users: findUser })
     } catch (error) {
