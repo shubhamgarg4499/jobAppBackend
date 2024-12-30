@@ -155,7 +155,7 @@ const applicationApprovalList = async (req, res, next) => {
 const userList = async (req, res, next) => {
     try {
         const { page, limit = 20, name, email, userType, isEmailVerified, isAdmin, userStatus } = req?.query
-
+        // console.log(userStatus);
         let skip = (page - 1) * limit
 
         let pipeline = []
@@ -196,10 +196,17 @@ const userList = async (req, res, next) => {
                 }
             })
         }
-        if (userStatus === true || userStatus === false) {
+        if (userStatus == "true") {
             pipeline.push({
                 $match: {
-                    isBlocked: userStatus
+                    isBlocked: true
+                }
+            })
+        }
+        if (userStatus == "false") {
+            pipeline.push({
+                $match: {
+                    isBlocked: false
                 }
             })
         }
