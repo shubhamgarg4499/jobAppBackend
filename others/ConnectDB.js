@@ -8,7 +8,7 @@ const mongoDB_Url_LOCAL = process.env.MONGODB_URL;
 
 async function connectDB() {
     try {
-        let connect = await mongoose.connect(mongoDB_Url_LOCAL);
+        let connect = await mongoose.connect(mongoDB_Url_ATLAS);
         console.log(connect.connection.host)
     } catch (error) {
         const message = error?.message || "Something went wrong while connecting DB"

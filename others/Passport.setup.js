@@ -7,9 +7,6 @@ const ErrorHandler = require("./ErrorHandler.class");
 const { generateToken } = require("./Extra.functions");
 const user = require("../models/User.models");
 require('dotenv').config()
-const CLIENT_ID_RENDER = process.env.CLIENT_ID
-const CLIENT_SECRET_RENDER = process.env.CLIENT_SECRET
-
 const CLIENT_ID_LOCAL = process.env.id
 const CLIENT_SECRET_LOCAL = process.env.secret
 // console.log(CLIENT_SECRET_LOCAL);
