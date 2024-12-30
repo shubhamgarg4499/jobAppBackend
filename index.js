@@ -9,7 +9,8 @@ require("dotenv").config()
 const port = process.env.PORT || 5000
 const cors = require("cors")
 app.use(cors({
-    origin: 'https://jobappdashboard.netlify.app/', // Allow your React app
+    // https://jobappdashboard.netlify.app/
+    origin: 'https://jobappdashboard.netlify.app', // Allow your React app
     credentials: true,
 }))
 const connectDB = require("./others/ConnectDB")
