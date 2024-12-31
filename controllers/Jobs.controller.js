@@ -1,4 +1,4 @@
-const { job } = require("../models/Jobs.model");
+const { job, govtJobs } = require("../models/Jobs.model");
 const user = require("../models/User.models");
 const ErrorHandler = require("../others/ErrorHandler.class");
 const mongoose = require("mongoose");
@@ -27,11 +27,28 @@ const createJob = async (req, res, next) => {
         return next(new ErrorHandler(error.status, error.message))
     }
 }
+const createGovtJobs = async (req, res, next) => {
+    try {
+        const { _id } = req.user
+        if (!_id) return next(new ErrorHandler(404, "User Not Found! Token Error"))
+        const { postName, qualification, totalNoOfPosts, department, officialLink, jobPostedOn = Date.now(), endDate, jobType, state } = req.body
+        if (!postName) return next(new ErrorHandler(400, "Post Name Required!"))
+        if (!qualification) return next(new ErrorHandler(400, "Qualification Required!"))
+        if (!department) return next(new ErrorHandler(400, "You must have tell the Department!"))
+        if (jobType.toLowerCase() == "state" && !state) return next(new ErrorHandler(400, "Please Provide which state vacancies it is."))
+        if (!jobType) return next(new ErrorHandler(400, "You have tell is this a Central govt job or State Govt Job!"))
 
+        await govtJobs.create({ createdBy: _id, postName, qualification, totalNoOfPosts, department, officialLink, jobPostedOn, endDate, jobType, state })
+
+        res.status(201).json({ message: "Job created Successfully", success: true })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
 // filteration
 const getJob = async (req, res, next) => {
     try {
-        const { jobId, title, company, Location, Status, salaryFrom, limit, page, workplace } = req?.query
+        const { jobId, title, company, Location, status, salaryFrom, limit, page, workplace, category } = req?.query
         // console.log(typeof salaryFrom);
         let aggregatePipeline = []
         let skip = ((page - 1) * limit)
@@ -49,6 +66,13 @@ const getJob = async (req, res, next) => {
             aggregatePipeline.push({
                 $match: {
                     jobWorkplace: { $regex: workplace, $options: "i" }
+                }
+            })
+        }
+        if (category) {
+            aggregatePipeline.push({
+                $match: {
+                    category: { $regex: category, $options: "i" }
                 }
             })
         }
@@ -73,10 +97,10 @@ const getJob = async (req, res, next) => {
                 }
             })
         }
-        if (Status) {
+        if (status) {
             aggregatePipeline.push({
                 $match: {
-                    jobStatus: { $regex: Status, $options: "i" }
+                    jobStatus: { $regex: status, $options: "i" }
                 }
             })
         }
@@ -128,6 +152,102 @@ const getJob = async (req, res, next) => {
         return next(new ErrorHandler(error.status, error.message))
     }
 }
+
+
+const getGovtJob = async (req, res, next) => {
+    try {
+        const {
+            postName,
+            qualification,
+            department,
+            jobType,
+            state,
+            isActive,
+            limit = 10
+        } = req?.query;
+
+        const pipiline = [];
+
+        if (postName) {
+            pipiline.push({
+                $match: {
+                    postName: {
+                        $regex: postName, $options: 'i'
+                    }
+                }
+            })
+        }
+
+        if (qualification) {
+            pipiline.push({
+                $match: {
+                    qualification: {
+                        $regex: qualification, $options: 'i'
+                    }
+                }
+            })
+        }
+
+        if (department) {
+            pipiline.push({
+                $match: {
+                    department: {
+                        $regex: department, $options: 'i'
+                    }
+                }
+            })
+        }
+
+        if (jobType) {
+            pipiline.push({
+                $match: {
+                    jobType: {
+                        $regex: jobType, $options: 'i'
+                    }
+                }
+            })
+        }
+
+        if (state) {
+            pipiline.push({
+                $match: {
+                    state: {
+                        $regex: state, $options: 'i'
+                    }
+                }
+            })
+        }
+
+        if (isActive === "true") {
+            pipiline.push({
+                $match: {
+                    isActive: true
+                }
+            })
+        }
+        if (isActive === "false") {
+            pipiline.push({
+                $match: {
+                    isActive: false
+                }
+            })
+        }
+
+        // if (qualification) query.qualification = { $in: qualification.split(',') };
+        // if (department) query.department = { $regex: department, $options: 'i' };
+        // if (jobType) query.jobType = jobType;
+        // if (state) query.state = { $regex: state, $options: 'i' };
+        // if (isActive !== undefined) query.isActive = isActive === 'true'
+        pipiline.push({ $limit: limit })
+        const jobs = await govtJobs.aggregate(pipiline);
+
+        res.json(jobs);
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+
 
 const applicationApprovalList = async (req, res, next) => {
     try {
@@ -229,8 +349,6 @@ const userList = async (req, res, next) => {
     }
 }
 
-
-
 const jobsPerMonth = async (req, res, next) => {
     try {
         const alljobs = await job.aggregate([
@@ -291,7 +409,6 @@ const ActivejobsPerDay = async (req, res, next) => {
     }
 }
 
-
 const deleteJobById = async (req, res, next) => {
     try {
         const { jobid } = req.query
@@ -302,4 +419,25 @@ const deleteJobById = async (req, res, next) => {
         return next(new ErrorHandler(error.status, error.message))
     }
 }
-module.exports = { createJob, getJob, applicationApprovalList, userList, jobsPerMonth, jobsPerDay, ActivejobsPerDay, deleteJobById }
+
+const deleteGovtJobById = async (req, res, next) => {
+    try {
+        const { jobid } = req.query
+        if (!jobid) return next(new ErrorHandler(404, "User ID not found!"))
+        const findAndDlt = await govtJobs.findByIdAndDelete(jobid)
+        res.status(200).json({ message: "Deleted SuccessFully" })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+const activeInactiveGovtJob = async (req, res, next) => {
+    try {
+        const { jobid, isActive } = req.query
+        if (!jobid) return next(new ErrorHandler(404, "User ID not found!"))
+        const findAndDlt = await govtJobs.findByIdAndUpdate(jobid, { isActive }, { new: true })
+        res.status(200).json({ message: "Updated SuccessFully" })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+module.exports = { createJob, getJob, applicationApprovalList, userList, jobsPerMonth, jobsPerDay, ActivejobsPerDay, deleteJobById, createGovtJobs, getGovtJob, deleteGovtJobById, activeInactiveGovtJob }
