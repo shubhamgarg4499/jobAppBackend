@@ -484,3 +484,210 @@ only one field required from `endDate and stillPursuing`
 ### ON ERROR
 
 - Error Message (It's A server Error Not A custom Error)
+
+# 17) Get user list
+
+- POST METHOD
+- URL `api/user/userlist`
+- Admin route User should be admin
+
+### Parameters
+
+- `Token`
+
+### query Parameters
+
+- `page, limit, name, email, userType, isEmailVerified, isAdmin, userStatus` (all are optional but by default limit is 20 it only give 20 object at one time)
+
+### Response (json response)
+
+- `users`
+
+### ON ERROR
+
+- Error Message (It's A server Error Not A custom Error)
+
+# 18) login With Token only
+
+    To keep user authenticated until token expired
+
+- POST METHOD
+- URL `api/user/loginwithtokenuser`
+
+### Parameters
+
+- `token in header`
+
+### ERROR
+
+- `UNAUTHORISED REQUEST` (if token wrong or expired)
+
+### Response
+
+`message: "SuccessFully Login", user(json), success: true`
+
+### ON ERROR
+
+- Error Message (It's A server Error Not A custom Error)
+
+`------------------------------------------------------------------`
+
+# `Jobs Related Routes Started From Here...`
+
+# 1) Create Job
+
+## POST METHOD
+
+- URL: `api/job/createJob`
+
+### Parameters
+
+- **Headers**:
+  - `token` (Authorization token)
+- **Body**:
+
+  - `jobPosition` (required)
+  - `workplace` `("onsite", "remote", "hybrid")` (required)
+  - `location` (required)
+  - `company` (required)
+  - `type` `("part time", "full time")` (required)
+  - `salaryFrom` (optional, default: "Not Disclosed")
+  - `salaryTo` (optional, default: "Not Disclosed")
+  - `category` `("private", "ngo", "freelance")` (required)
+  - `lastDate` (optional, default: "")
+  - `description` (required)
+  - `qualification` (required, array of string)
+
+- **Custom Validation Errors**:
+  - `jobPosition, workplace, location, company, type, category are required` (when any required field is empty).
+  - `Only Array Allowed in Qualification` (when `qualification` is not an array).
+  - `You can't post government job. Only staff can!` (when `category` is "government" but the user is not an admin).
+
+### Response (JSON)
+
+```{
+  "success": true,
+  "message": "Job POSTED Successfully",
+  "job": {
+    "user": "<userId>",
+    "jobPosition": "<position>",
+    "jobWorkplace": "<workplace>",
+    "jobLocation": "<location>",
+    "company": "<company>",
+    "jobType": "<type>",
+    "description": "<description>",
+    "lastDate": "<lastDate>",
+    "category": "<category>",
+    "salaryFrom": "<salaryFrom>",
+    "salaryTo": "<salaryTo>",
+    "qualification": ["<qualification1>", "<qualification2>"]
+  }
+}
+```
+
+# 2) Get Job
+
+## GET METHOD
+
+- URL: `api/job/getJob`
+
+### Parameters
+
+- `Token in header`
+- **Query Parameters**:
+  - `jobId` (optional): Filter jobs by specific job ID.
+  - `title` (optional): Search jobs by title.
+  - `company` (optional): Filter jobs by company name.
+  - `Location` (optional): Filter jobs by location.
+  - `status` (optional): Filter jobs by job status (e.g., "active", "inactive").
+  - `salaryFrom` (optional): Minimum salary filter.
+  - `limit` (optional): Maximum number of jobs to retrieve (default: 10, max: 30).
+  - `page` (optional): Page number for pagination (default: 1).
+  - `workplace` (optional): Filter jobs by workplace type (e.g., "onsite", "remote", "hybrid").
+  - `category` (optional): Filter jobs by category (e.g., "private", "ngo", "freelance").
+
+### Errors
+
+1. **Pagination Limit Error**:
+
+   - "Can't give more than 30 Jobs Data At Once. It can cause app crash! Change the page to get more data."
+
+2. **Server Error**:
+   - "An unexpected error occurred. Please try again later."
+
+### Response (JSON)
+
+#### On Success:
+
+```json
+[
+  {
+    "_id": "<jobId>",
+    "user": [
+      {
+        "fullName": "<userName>",
+        "email": "<userEmail>",
+        "profile_picture": "<userProfilePicture>"
+      }
+    ],
+    "jobPosition": "<jobPosition>",
+    "jobWorkplace": "<workplace>",
+    "jobLocation": "<location>",
+    "company": "<company>",
+    "jobType": "<type>",
+    "description": "<description>",
+    "lastDate": "<lastDate>",
+    "category": "<category>",
+    "salaryFrom": "<salaryFrom>",
+    "salaryTo": "<salaryTo>",
+    "qualification": ["<qualification1>", "<qualification2>"],
+    "jobStatus": "<status>",
+    "createdAt": "<timestamp>",
+    "updatedAt": "<timestamp>"
+  }
+]
+```
+
+# 3) Get Government Job
+
+## GET METHOD
+
+- **URL**: `/api/job/govt-jobs`
+
+### Parameters
+
+- **Token**: Required in the header.
+
+- **Query Parameters**:
+  - `id` (optional)
+  - `postName` (optional)
+  - `qualification` (optional)
+  - `department` (optional)
+  - `jobType` (optional) ("full time", "part time")
+  - `state` (optional)
+  - `isActive` (optional) (`"true"` for active jobs, `"false"` for inactive jobs).
+  - `limit` (optional) (default: 10)
+
+### Response (JSON)
+
+```json
+[
+  {
+    "_id": "<jobId>",
+    "postName": "<postName>",
+    "qualification": ["<qualification1>", "<qualification2>"],
+    "department": "<department>",
+    "jobType": "<jobType>",
+    "state": "<state>",
+    "isActive": <true/false>,
+    "createdAt": "<timestamp>",
+    "updatedAt": "<timestamp>"
+  }
+]
+```
+
+### Errors
+
+**Server Error**:
+
+- "An unexpected error occurred. Please try again later."

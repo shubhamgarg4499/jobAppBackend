@@ -10,13 +10,13 @@ const createJob = async (req, res, next) => {
         const { jobPosition, workplace, location, company, type, salaryFrom = "Not Disclosed", salaryTo = "Not Disclosed", category, lastDate = "", description, qualification } = req?.body;
 
         if ([jobPosition, workplace, location, company, type, category, description].some(e => e.trim() === "")) {
-            return next(new ErrorHandler(400, "jobPosition, workplace, location, company, type, salary, category are required"));
+            return next(new ErrorHandler(400, "jobPosition, workplace, location, company, type, category are required"));
         }
         if (typeof qualification !== "object") {
             return next(new ErrorHandler(400, "Only Array Allowed in Qualification"))
         }
         const findedUser = await user.findById(_id)
-        if (category.toLowerCase() == "government" && !findedUser.isAdmin) return next(new ErrorHandler(400, "You cant post government job Only App Staffs Can"))
+        if (category.toLowerCase() == "government" && !findedUser.isAdmin) return next(new ErrorHandler(400, "You cant post government job Only Staff Can!"))
         // if (salary !== "object") return next(new ErrorHandler(400, "Only Object Allowed"))
 
 
@@ -138,7 +138,7 @@ const getJob = async (req, res, next) => {
                 $limit: Number(limit)
             })
         }
-        const findJob = await job.aggregate(aggregatePipeline)
+        const findedJob = await job.aggregate(aggregatePipeline)
         // [
         //     {
         //         $match: {
@@ -146,7 +146,7 @@ const getJob = async (req, res, next) => {
         //         }
         //     }
         // ]
-        res.send(findJob)
+        res.send(findedJob)
 
     } catch (error) {
         return next(new ErrorHandler(error.status, error.message))
@@ -157,6 +157,7 @@ const getJob = async (req, res, next) => {
 const getGovtJob = async (req, res, next) => {
     try {
         const {
+            id,
             postName,
             qualification,
             department,
@@ -168,6 +169,15 @@ const getGovtJob = async (req, res, next) => {
 
         const pipiline = [];
 
+        if (id) {
+            pipiline.push({
+                $match: {
+                    _id: {
+                        $regex: id, $options: 'i'
+                    }
+                }
+            })
+        }
         if (postName) {
             pipiline.push({
                 $match: {
@@ -233,11 +243,6 @@ const getGovtJob = async (req, res, next) => {
             })
         }
 
-        // if (qualification) query.qualification = { $in: qualification.split(',') };
-        // if (department) query.department = { $regex: department, $options: 'i' };
-        // if (jobType) query.jobType = jobType;
-        // if (state) query.state = { $regex: state, $options: 'i' };
-        // if (isActive !== undefined) query.isActive = isActive === 'true'
         pipiline.push({ $limit: limit })
         const jobs = await govtJobs.aggregate(pipiline);
 
