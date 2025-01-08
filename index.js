@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000
 const cors = require("cors")
 app.use(cors({
     // https://jobappdashboard.netlify.app/
-    origin: 'http://localhost:5173', // Allow your React app
+    origin: ['http://localhost:5173', "https://jobappdashboard.netlify.app"], // Allow your React app
     credentials: true,
 }))
 const connectDB = require("./others/ConnectDB")
