@@ -451,29 +451,10 @@ only one field required from `endDate and stillPursuing`
 
 - `token in header`
 - `resume (pdf file only) (required)`
-- `langKnown (array name)` : [
-
-        {
-
-        "languageName": "english" (string) (required)
-
-        "oralLevel":"intermediate" (string) (required)
-
-        "writtenLevel":"intermediate" (string)(required)
-
-        "primaryLanguage":false (boolean)(optional)
-
-        }
-
-  ]
 
 ### ERROR
 
 - Only PDF File Allowed
-
-- `Need Atleast One Object To Add` (when user try to change with empty field)
-
-- `Fields (Language Name, Oral Level & Written Level) must be filled.`
 
 ### Response (json response)
 
