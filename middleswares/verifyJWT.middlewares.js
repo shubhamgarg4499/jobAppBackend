@@ -4,6 +4,7 @@ const ErrorHandler = require('../others/ErrorHandler.class');
 
 
 const verifyTokenMiddleware = async (req, res, next) => {
+    // console.log("hello");
     const token = req?.query?.token || req.headers.authorization?.split(' ')[1];
     // console.log(token);
     if (!token) {

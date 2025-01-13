@@ -672,3 +672,36 @@ only one field required from `endDate and stillPursuing`
 **Server Error**:
 
 - "An unexpected error occurred. Please try again later."
+
+# 3) Get Total Active Jobs
+
+`category based`
+
+## GET METHOD
+
+- **URL**: `/api/job/totalNumberOfActiveJobs`
+
+### Parameters
+
+- **Token**: Required in the header.
+
+- **Query Parameters**:
+  - `id` (optional)
+  - category("private","govt","ngo","freelance") if dont give any category Parameter it will return total active jobs
+
+### Response (JSON)
+
+```json
+{
+  "activeJobCount": 2
+}
+```
+
+### Errors
+
+**Custom Error** (if request any random category)
+
+- "You can request for Private jobs, NGO Jobs, Freelance Jobs and Govt Jobs"
+  **Server Error**:
+
+- "An unexpected error occurred. Please try again later."

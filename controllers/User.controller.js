@@ -519,7 +519,12 @@ const uploadResume = async (req, res, next) => {
         res.status(200).json({ message: "Resume Updated Successfully", success: true, resume: findAndUpdateUser.resume })
 
     } catch (error) {
-        return next(new ErrorHandler(error.status, error.message))
+        const userResume = req?.file
+        fs.unlink(userResume.path, (err) => {
+            if (err) return next(new ErrorHandler(err.status, err.message))
+
+        })
+
     }
 }
 

@@ -18,7 +18,7 @@ connectDB()
 
 // passport 
 
-const passport = require("passport");
+const passport = require("passport"); ``
 const passportHandler = require("./others/Passport.setup")
 app.use(passport.initialize())
 passportHandler()
