@@ -404,14 +404,6 @@ const AddSkills = async (req, res, next) => {
         }
 
         if (skill.length < 1) return next(new ErrorHandler(400, "Atleast 1 Skill required to Add"))
-
-        // for (let element of skill) {
-        //     await user.findByIdAndUpdate(_id, {
-        //         $addToSet: {
-        //             skills: element
-        //         }
-        //     })
-        // }
         await user.findByIdAndUpdate(_id, {
             $addToSet: {
                 skills: { $each: skill }
