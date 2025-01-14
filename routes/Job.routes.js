@@ -16,7 +16,7 @@ jobRouter.route("/deletejobbyid").post(verifyTokenMiddleware, isAdmin, deleteJob
 jobRouter.route("/deletegovtjobbyid").post(verifyTokenMiddleware, isAdmin, deleteGovtJobById)
 jobRouter.route("/activeinactivegovtjob").post(verifyTokenMiddleware, isAdmin, activeInactiveGovtJob)
 jobRouter.route("/creategovtjobs").post(verifyTokenMiddleware, isAdmin, createGovtJobs)
-jobRouter.route("/totalNumberOfActiveJobs").post(totalNumberOfActiveJobs)
+jobRouter.route("/totalNumberOfActiveJobs").get(verifyTokenMiddleware, totalNumberOfActiveJobs)
 
 
 module.exports = jobRouter

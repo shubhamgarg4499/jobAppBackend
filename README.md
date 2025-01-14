@@ -631,7 +631,7 @@ only one field required from `endDate and stillPursuing`
 
 # 3) Get Government Job
 
-## GET METHOD
+### POST METHOD
 
 - **URL**: `/api/job/govt-jobs`
 
@@ -673,7 +673,7 @@ only one field required from `endDate and stillPursuing`
 
 - "An unexpected error occurred. Please try again later."
 
-# 3) Get Total Active Jobs
+# 4) Get Total Active Jobs
 
 `category based`
 
@@ -685,23 +685,31 @@ only one field required from `endDate and stillPursuing`
 
 - **Token**: Required in the header.
 
-- **Query Parameters**:
-  - `id` (optional)
-  - category("private","govt","ngo","freelance") if dont give any category Parameter it will return total active jobs
-
 ### Response (JSON)
 
 ```json
-{
-  "activeJobCount": 2
-}
+[
+  {
+    "_id": "ngo",
+    "count": 1
+  },
+  {
+    "_id": "freelance",
+    "count": 1
+  },
+  {
+    "_id": "private",
+    "count": 1
+  },
+  {
+    "_id": "govt",
+    "count": 2
+  }
+]
 ```
 
 ### Errors
 
-**Custom Error** (if request any random category)
-
-- "You can request for Private jobs, NGO Jobs, Freelance Jobs and Govt Jobs"
-  **Server Error**:
+**Server Error**:
 
 - "An unexpected error occurred. Please try again later."

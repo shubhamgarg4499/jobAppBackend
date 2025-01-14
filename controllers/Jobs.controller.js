@@ -447,65 +447,40 @@ const activeInactiveGovtJob = async (req, res, next) => {
 }
 
 const totalNumberOfActiveJobs = async (req, res, next) => {  // only private,ngo, freelance jobs
-    const { category } = req.query
-    const pipeline = []
+    try {
 
-    if (category) {
-        if (category !== "private" && category !== "ngo" && category !== "freelance" && category !== "govt") {
-            return next(new ErrorHandler(400, "You can request for Private jobs, NGO Jobs, Freelance Jobs and Govt Jobs"))
-        }
-        if (category == "govt") {
-            pipeline.push(
-                {
-                    $match: {
-                        isActive: true
-                    }
-                })
-            pipeline.push({
-                $count: "activeJobCount"
-            },)
-            const result = await govtJobs.aggregate(pipeline)
-            return res.status(200).json(result[0])
-        }
-        pipeline.push({
-            $match: {
-                category: { $regex: category, $options: "i" }
-            }
-        },
+        const countJobs = await job.aggregate([
             {
                 $match: {
                     jobStatus: "active"
                 }
-            })
-        pipeline.push({
-            $count: "activeJobCount"
-        })
-        const result = await job.aggregate(pipeline)
-        return res.status(200).json(result[0])
+            },
+            {
+                $group: {
+                    _id: "$category",
+                    count: { $sum: 1 }
+                }
+            }
+        ])
+
+        const countGovtJobs = await govtJobs.aggregate([
+            {
+                $match: {
+                    isActive: true
+                }
+            },
+            {
+                $group: {
+                    _id: "govt",
+                    count: { $sum: 1 }
+                }
+            },
+
+        ])
+        res.status(200).send([...countJobs, ...countGovtJobs])
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
     }
-    const result = await job.aggregate([
-        {
-            $match: {
-                jobStatus: "active"
-            }
-        },
-        {
-            $count: "activeJobCount"
-        }
-    ])
-    const result2 = await govtJobs.aggregate([
-        {
-            $match: {
-                isActive: true
-            }
-        },
-        {
-            $count: "activeJobCount"
-        }
-    ])
-    console.log(result[0]);
-    console.log(result2[0]);
-    res.status(200).json({ activeJobCount: result[0].activeJobCount + result2[0].activeJobCount })
 }
 
 
