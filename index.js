@@ -12,13 +12,17 @@ require("dotenv").config()
 //console.log('process env::::::; ',process.env);
 
 const cors = require("cors")
-app.use(cors())
+app.use(cors({
+    // https://jobappdashboard.netlify.app/
+    origin: ['http://localhost:5173', "https://jobappdashboard.netlify.app"], // Allow your React app
+    credentials: true,
+}))
 const connectDB = require("./others/ConnectDB")
 connectDB()
 
 // passport 
 
-const passport = require("passport");
+const passport = require("passport"); ``
 const passportHandler = require("./others/Passport.setup")
 app.use(passport.initialize())
 passportHandler()
@@ -29,6 +33,9 @@ app.get("/", (req, res, next) => {
     res.send(`<a href="/auth/google?userType=employer">Login</a>`)
 })
 app.use('/auth/google', authRoute)
+
+// user routes
+const userRouter = require("./routes/User.routes")
 app.use('/api/user', userRouter)
 
 // job routes

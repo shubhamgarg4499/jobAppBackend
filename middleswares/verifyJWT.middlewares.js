@@ -4,6 +4,7 @@ const ErrorHandler = require('../others/ErrorHandler.class');
 
 
 const verifyTokenMiddleware = async (req, res, next) => {
+    // console.log("hello");
     const token = req?.query?.token || req.headers.authorization?.split(' ')[1];
     // console.log(token);
     if (!token) {
@@ -14,6 +15,7 @@ const verifyTokenMiddleware = async (req, res, next) => {
         if (decoded) {
             const findUser = await user.findOne({ token })
             if (!findUser) return next(new ErrorHandler(401, "Token expired or Wrong token"))
+            if (findUser.isBlocked) return next(new ErrorHandler(401, "You are blocked You can't Perform Actions"))
             req.user = findUser
             next()
         }

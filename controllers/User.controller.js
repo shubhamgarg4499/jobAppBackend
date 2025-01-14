@@ -161,6 +161,7 @@ const verifyOTP = async function (req, res, next) {
 const SignIn = async function (req, res, next) {
     try {
         const { email, password, userType } = req?.body
+        console.log(userType);
         // console.log(email, password);
         // validate
         if (!email) { return next(new ErrorHandler(400, "Email Required!")) }
@@ -169,7 +170,7 @@ const SignIn = async function (req, res, next) {
 
         // find user by given email
         const findUser = await user.findOne({ email })
-
+        if (!findUser) { return next(new ErrorHandler(404, "Invalid Email / Password")) }
         // validate user
         if (findUser.userType !== userType.toLowerCase()) { return next(new ErrorHandler(404, "Profile Error! Cant Sign In")) }
         if (!findUser) { return next(new ErrorHandler(404, "User Not Found! Please SignUp")) }
@@ -510,9 +511,140 @@ const uploadResume = async (req, res, next) => {
         res.status(200).json({ message: "Resume Updated Successfully", success: true, resume: findAndUpdateUser.resume })
 
     } catch (error) {
+        const userResume = req?.file
+        fs.unlink(userResume.path, (err) => {
+            if (err) return next(new ErrorHandler(err.status, err.message))
+
+        })
+
+    }
+}
+
+const addDocuments = async (req, res, next) => {
+    try {
+        const { _id } = req?.user
+        const documents = req?.files
+        // res.send(documents)
+        // if (typeof document !== "object") return next(new ErrorHandler(400, "Only Array Of object Allowed"))
+        if (documents.length < 1) return next(new ErrorHandler(400, "Need Atleast One Document"))
+        // if (email) return next(new ErrorHandler(400, "Need Email ID"))
+        let docs = [];
+        for (const iterator of documents) {
+            // console.log(iterator);
+            docs.push({ documentName: iterator.filename, documentPhoto: iterator.path })
+            // documentName
+            // documentPhoto
+        }
+
+        const findUpdate = await user.findByIdAndUpdate(_id, {
+            $push: {
+                documents: docs
+            }
+        }, {
+            new: true
+        });
+        res.status(200).json({ user: findUpdate })
+    } catch (error) {
         return next(new ErrorHandler(error.status, error.message))
     }
 }
 
 
-module.exports = { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, AboutMe, workExperience, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume } 
+const approveUser = async (req, res, next) => {
+    try {
+        const { id } = req.query
+        const { status } = req?.body
+        if (!id) return next(new ErrorHandler(400, "User ID required"))
+        if (!status) return next(new ErrorHandler(400, "Status required"))
+        const find = await user.findByIdAndUpdate(id, { approval: status == "approved" ? "approved" : "rejected" }, { new: true })
+        res.status(200).json({ message: status == "approved" ? "Approved successfully" : "Rejected successfully", success: true })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+
+const blockUser = async (req, res, next) => {
+    try {
+        const { id } = req.query
+        if (!id) return next(new ErrorHandler(404, "User ID not Found!"))
+        await user.findByIdAndUpdate(id, { isBlocked: true }, { new: true })
+        res.status(200).json({ message: "User Blocked", success: true })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+const UnblockUser = async (req, res, next) => {
+    try {
+        const { id } = req.query
+        if (!id) return next(new ErrorHandler(404, "User ID not Found!"))
+        await user.findByIdAndUpdate(id, { isBlocked: false }, { new: true })
+        res.status(200).json({ message: "User Unblocked Successfuly", success: true })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+
+const userJoinedToday = async (req, res, next) => {
+    try {
+        const dayStart = new Date()
+        dayStart.setHours(0, 0, 0, 0)
+        const dayEnd = new Date()
+        dayEnd.setHours(23, 59, 59, 999)
+
+        const userFind = await user.find({
+            createdAt: { $gte: dayStart, $lt: dayEnd }
+        })
+        res.send(userFind)
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+const userPerMonth = async (req, res, next) => {
+    try {
+        const allUsers = await user.aggregate([
+            {
+                $addFields: {
+                    createdAt: { $toDate: "$createdAt" } // Convert to Date if it's a timestamp
+                }
+            },
+            {
+                $project: {
+                    month: { $month: "$createdAt" },
+                    year: { $year: "$createdAt" }
+                }
+            },
+            {
+                $group: {
+                    _id: { year: "$year", month: "$month" },
+                    userCount: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { "_id.year": 1, "_id.month": 1 }
+            }
+        ]);
+
+        // console.log(v);
+        res.send(allUsers)
+
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+
+// for keep user login until user have valid token
+const loginWithToken = async (req, res, next) => {
+    try {
+        const { _id } = req?.user
+        if (!_id) return next(new ErrorHandler(402, "UNAUTHORISED REQUEST"))
+        const findUser = await user.findById(_id)
+        if (!findUser) return next(new ErrorHandler(402, "UNAUTHORISED REQUEST"))
+        res.status(200).json({ message: "SuccessFully Login", user: findUser, success: true })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+module.exports = { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, AboutMe, workExperience, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume, addDocuments, approveUser, blockUser, userJoinedToday, loginWithToken, userPerMonth, UnblockUser } 
