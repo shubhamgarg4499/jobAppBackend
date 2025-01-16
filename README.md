@@ -631,7 +631,7 @@ only one field required from `endDate and stillPursuing`
 
 # 3) Get Government Job
 
-### POST METHOD
+### GET METHOD
 
 - **URL**: `/api/job/govt-jobs`
 
