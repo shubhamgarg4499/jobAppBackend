@@ -31,7 +31,7 @@ userRouter.route("/adddocuments").post(verifyTokenMiddleware, upload.array("docu
 
 
 
-userRouter.route("/userlist").post(verifyTokenMiddleware, isAdmin, userList)
+userRouter.route("/userlist").get(verifyTokenMiddleware, isAdmin, userList)
 userRouter.route("/loginwithtokenuser").post(verifyTokenMiddleware, loginWithToken)
 // readme not added
 userRouter.route("/approveuser").post(verifyTokenMiddleware, isAdmin, approveUser)

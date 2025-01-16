@@ -468,7 +468,7 @@ only one field required from `endDate and stillPursuing`
 
 # 17) Get user list
 
-- POST METHOD
+- GET METHOD
 - URL `api/user/userlist`
 - Admin route User should be admin
 
