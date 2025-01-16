@@ -5,8 +5,8 @@ const verifyTokenMiddleware = require('../middleswares/verifyJWT.middlewares')
 const jobRouter = express.Router()
 
 jobRouter.route("/createJob").post(verifyTokenMiddleware, createJob)
-jobRouter.route("/getJob").post(verifyTokenMiddleware, getJob)
-jobRouter.route("/govt-jobs").post(verifyTokenMiddleware, getGovtJob)
+jobRouter.route("/getJob").get(verifyTokenMiddleware, getJob)
+jobRouter.route("/govt-jobs").get(verifyTokenMiddleware, getGovtJob)
 
 jobRouter.route("/getapprovallist").post(verifyTokenMiddleware, isAdmin, applicationApprovalList)
 jobRouter.route("/jobspermonth").post(verifyTokenMiddleware, isAdmin, jobsPerMonth)
