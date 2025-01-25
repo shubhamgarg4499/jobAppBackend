@@ -69,8 +69,9 @@ const localIP = getLocalIPAddress();
 // const port = process.env.PORT || 5000
 app.listen(port, () => {
     // Complete URL (protocol + IP address + port)
-    const completeURL = `http://${localIP}:${port}`;
-    console.log('Complete url: ', completeURL);
+    // const completeURL = `http://${localIP}:${port}`;
+    // console.log('Complete url: ', completeURL);
+    console.log(`Server running on: http://localhost:${port}`)
 })
 
 app.use(ErrorMiddleware)
