@@ -45,6 +45,9 @@ app.use('/api/user', userRouter)
 const jobRouter = require("./routes/Job.routes")
 app.use("/api/job", jobRouter)
 
+// company routes
+const companyRouter = require("./routes/Company.routes")
+app.use("/api/company", companyRouter)
 
 
 
