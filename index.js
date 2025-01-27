@@ -49,7 +49,13 @@ app.use("/api/job", jobRouter)
 const companyRouter = require("./routes/Company.routes")
 app.use("/api/company", companyRouter)
 
+// post routes
+const postRouter = require("./routes/Post.routes")
+app.use("/api/post", postRouter)
 
+// application routes
+const applicationRouter = require("./routes/Application.route")
+app.use("/api/application", applicationRouter)
 
 function getLocalIPAddress() {
     const interfaces = os.networkInterfaces();

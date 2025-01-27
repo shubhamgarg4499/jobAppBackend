@@ -1,5 +1,21 @@
 const mongoose = require('mongoose');
 
+const address = new mongoose.Schema({
+    street: {
+        type: String
+    },
+    state: {
+        type: String
+    },
+    zipCode: {
+        type: String
+    },
+    country: {
+        type: String
+    },
+
+})
+
 const companySchema = new mongoose.Schema({
     name: {
         type: String,
@@ -42,7 +58,12 @@ const companySchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true
-    }
+    },
+    logo: {
+        type: String,
+        default: null,
+    },
+    address: address,
 }, { timestamps: true });
 
 module.exports = mongoose.model('Company', companySchema);
