@@ -4,7 +4,7 @@ const { createApplication, getAllApplications, getApplicationById, updateApplica
 
 router.post("/create", createApplication);
 router.get("/listall", getAllApplications);
-router.get("/detail/:id", getApplicationById);
+router.get("/detailone/:id", getApplicationById);
 router.put("/update/:id", updateApplication);
 router.delete("/delete/:id", deleteApplication);
 router.post("/shortlist/:id", shortlistApplication);

@@ -1,71 +1,131 @@
 const Application = require("../models/Application.model");
+const ErrorHandler = require("../others/ErrorHandler.class");
 
-exports.createApplication = async (req, res) => {
+const handleApplicationNotFound = (next) => {
+    return next(new ErrorHandler(404, "Application not found."));
+};
+
+// Create a new application
+exports.createApplication = async (req, res, next) => {
     try {
-        const application = new Application(req.body);
+        const { jobid, user, role, cover_letter, notes } = req.body;
+
+        if (!jobid || !user || !role) {
+            return next(new ErrorHandler(400, "jobid, user, and role are required."));
+        }
+
+        const application = new Application({
+            jobid,
+            user,
+            role,
+            cover_letter,
+            notes,
+        });
+
         await application.save();
         res.status(201).json({ message: "Application submitted successfully.", id: application._id });
     } catch (error) {
-        res.status(500).json({ error: "Failed to submit application.", details: error.message });
+        return next(new ErrorHandler(error.status || 500, error.message || "Internal Server Error"));
     }
 };
 
-exports.getAllApplications = async (req, res) => {
+// Get all applications with optional filters and pagination
+exports.getAllApplications = async (req, res, next) => {
     try {
-        const filters = req.query;
-        const applications = await Application.find(filters);
-        res.status(200).json(applications);
+        const { page = 1, limit = 10, ...filters } = req.query;
+
+        const applications = await Application.find(filters)
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .exec();
+
+        const count = await Application.countDocuments(filters);
+
+        res.status(200).json({
+            total: count,
+            page: parseInt(page),
+            limit: parseInt(limit),
+            applications,
+        });
     } catch (error) {
-        res.status(500).json({ error: "Failed to fetch applications.", details: error.message });
+        return next(new ErrorHandler(error.status || 500, error.message || "Internal Server Error"));
     }
 };
 
-exports.getApplicationById = async (req, res) => {
+// Get a single application by ID
+exports.getApplicationById = async (req, res, next) => {
     try {
         const application = await Application.findById(req.params.id);
-        if (!application) return res.status(404).json({ error: "Application not found." });
+        if (!application) return handleApplicationNotFound(next);
         res.status(200).json(application);
     } catch (error) {
-        res.status(500).json({ error: "Failed to fetch application.", details: error.message });
+        return next(new ErrorHandler(error.status || 500, error.message || "Internal Server Error"));
     }
 };
 
-exports.updateApplication = async (req, res) => {
+// Update an application
+exports.updateApplication = async (req, res, next) => {
     try {
-        const application = await Application.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!application) return res.status(404).json({ error: "Application not found." });
+        const { id } = req.params;
+        const updates = req.body;
+
+        const application = await Application.findByIdAndUpdate(id, updates, { new: true });
+        if (!application) return handleApplicationNotFound(next);
+
         res.status(200).json({ message: "Application updated successfully.", application });
     } catch (error) {
-        res.status(500).json({ error: "Failed to update application.", details: error.message });
+        return next(new ErrorHandler(error.status || 500, error.message || "Internal Server Error"));
     }
 };
 
-exports.deleteApplication = async (req, res) => {
+// Delete an application
+exports.deleteApplication = async (req, res, next) => {
     try {
-        const application = await Application.findByIdAndDelete(req.params.id);
-        if (!application) return res.status(404).json({ error: "Application not found." });
+        const { id } = req.params;
+
+        const application = await Application.findByIdAndDelete(id);
+        if (!application) return handleApplicationNotFound(next);
+
         res.status(200).json({ message: "Application deleted successfully." });
     } catch (error) {
-        res.status(500).json({ error: "Failed to delete application.", details: error.message });
+        return next(new ErrorHandler(error.status || 500, error.message || "Internal Server Error"));
     }
 };
 
-exports.shortlistApplication = async (req, res) => {
+// Shortlist an application
+exports.shortlistApplication = async (req, res, next) => {
     try {
-        const application = await Application.findByIdAndUpdate(req.params.id, { shortlisted: true }, { new: true });
-        if (!application) return res.status(404).json({ error: "Application not found." });
+        const { id } = req.params;
+
+        const application = await Application.findByIdAndUpdate(
+            id,
+            { status: "Shortlisted" },
+            { new: true }
+        );
+
+        if (!application) return handleApplicationNotFound(next);
+
         res.status(200).json({ message: "Application shortlisted successfully.", application });
     } catch (error) {
-        res.status(500).json({ error: "Failed to shortlist application.", details: error.message });
+        return next(new ErrorHandler(error.status || 500, error.message || "Internal Server Error"));
     }
 };
 
-exports.hireApplication = async (req, res) => {
+// Mark an application as hired
+exports.hireApplication = async (req, res, next) => {
     try {
-        const application = await Application.findByIdAndUpdate(req.params.id, { hired: true }, { new: true });
-        if (!application) return res.status(404).json({ error: "Application not found." });
+        const { id } = req.params;
+
+        const application = await Application.findByIdAndUpdate(
+            id,
+            { status: "Hired" },
+            { new: true }
+        );
+
+        if (!application) return handleApplicationNotFound(next);
+
         res.status(200).json({ message: "Application marked as hired.", application });
     } catch (error) {
-        res.status(500).json({ error: "Failed to mark application as hired.", details: error.message });
+        return next(new ErrorHandler(error.status || 500, error.message || "Internal Server Error"));
     }
 };
