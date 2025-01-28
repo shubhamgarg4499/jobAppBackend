@@ -629,7 +629,49 @@ only one field required from `endDate and stillPursuing`
 ]
 ```
 
-# 3) Get Government Job
+# 3) Create Government Job
+
+### POST METHOD
+
+- **URL**: `api/job/creategovtjobs`
+
+### **Parameters**
+
+#### **Headers**:
+- `token` (Authorization token): This header is used to pass the authentication token.
+
+#### **Body**:
+
+- **createdBy** (required): The ID of the user who created the job post (ObjectId).
+- **postName** (required): The title of the job position (e.g., "Software Engineer").
+- **qualification** (required): An array of strings representing the qualifications required for the job.
+- **totalNoOfPosts** (optional): The total number of posts available for the job.
+- **department** (required): The department where the job position belongs (e.g., "Engineering").
+- **officialLink** (optional): The official URL link to the job post.
+- **jobPostedOn** (optional, default: Current Date): The date when the job was posted.
+- **endDate** (optional): The end date for the job application period. This should be after the `jobPostedOn` date.
+- **jobType** (required, enum: `"central"`, `"state"`): The type of job posting, either central or state.
+- **state** (optional): The state where the job is located (e.g., "delhi").
+- **isActive** (optional, default: `true`): Whether the job posting is active or not.
+
+#### **Custom Validation Errors**:
+- `postName, qualification, department, jobType are required` (when any required field is missing).
+- `qualification must be an array` (when `qualification` is not an array).
+- `End date must be after the posting date` (when `endDate` is before `jobPostedOn`).
+- `You can't post a government job. Only staff can!` (when the `category` is "government" but the user is not an admin).
+
+---
+
+### **Response (JSON)**
+
+```json
+{
+  "success": true,
+  "message": "Job POSTED Successfully",
+}
+```
+
+# 4) Get Government Job
 
 ### GET METHOD
 
@@ -673,7 +715,7 @@ only one field required from `endDate and stillPursuing`
 
 - "An unexpected error occurred. Please try again later."
 
-# 4) Get Total Active Jobs
+# 5) Get Total Active Jobs
 
 `category based`
 
