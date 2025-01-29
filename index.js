@@ -5,7 +5,7 @@ const ErrorHandler = require("./others/ErrorHandler.class")
 // google auth routes
 const authRoute = require("./routes/GoogleAuth.routes")
 // user routes
-const userRouter = require("./routes/UserProfile.routes")
+//const userRouter = require("./routes/UserProfile.routes")
 const app = express()
 app.use(express.json())
 require("dotenv").config()
@@ -72,9 +72,9 @@ const localIP = getLocalIPAddress();
 const port = process.env.PORT || 5000
 app.listen(port, () => {
     // Complete URL (protocol + IP address + port)
-    // const completeURL = `http://${localIP}:${port}`;
-    // console.log('Complete url: ', completeURL);
-    console.log(`Server running on: http://localhost:${port}`)
+    const completeURL = `http://${localIP}:${port}`;
+    console.log('Complete url: ', completeURL);
+   // console.log(`Server running on: http://localhost:${port}`)
 })
 
 app.use(ErrorMiddleware)
