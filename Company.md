@@ -8,8 +8,43 @@ http://localhost:3000/companies
 ## Note
 ### /list/id and /listall require only token
 
-### /create, /update and /delete require both token and user to be an Admin
+### /create requires both token and user to be employer
 
+### /delete and add employee require both token and user to be an Admin
+
+ur description:
+
+## Flow Overview
+
+1. **/list/:id** and **/listall**:
+   - **Requirement**: Only the **Token** is required.
+   - These routes allow authenticated users to retrieve company details or a list of all companies.
+
+2. **/create**:
+   - **Requirement**: Both **Token** and the user must be a verified **Employer**.
+   - Any verified employer can create a new company by submitting the necessary details. 
+   - After the company is created, an **Admin** needs to add the user who created the company to the **employers** list of that company.
+
+3. **/delete** and **/addEmployer**:
+   - **Requirement**: Both **Token** and the user must be an **Admin**.
+   - Only an Admin can delete a company or add an employer to a company.
+   - The Admin will be responsible for managing which users are part of the company’s employer list.
+
+4. **Creating Jobs**:
+   - After creating a company, only those users who are added to the **employers** list of that company can create jobs related to that company.
+   - This ensures that only legitimate employees (as defined by the company's employer list) can post jobs for that company.
+
+### Sequence of Actions:
+
+1. **Employer creates a company**:
+   - An authenticated **Employer** sends a **POST request** to **/create** with the required details.
+   
+2. **Admin adds the Employer to the company's employers list**:
+   - After the company is created, an **Admin** uses the **/addEmployer** route to add the Employer's user ID to the **employers** list of that company.
+
+3. **Employer creates a job**:
+   - Once the Employer is added to the company's employer list, they can create jobs related to the company.
+   
 ### Headers:
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzk0ZDJjMTQ5ODlhMmFkMWQyZmU2ZGYiLCJpYXQiOjE3Mzc4MDkyOTksImV4cCI6MTczODQxNDA5OX0.eWPqnbLRH1S9KO5bsS9aId5igD4SDsxZWpAU_hTG39w
@@ -19,210 +54,341 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzk0ZDJjM
 
 ## Endpoints
 
-### 1. **Create a New Company**
-- **Endpoint**: `POST /companies`
-- **Description**: Registers a new company.
-- **Request Payload**:
-  
-```json
+# 1) Create Company
+
+### POST METHOD
+
+- **URL**: `/api/company/create`
+
+### Headers
+
+- **Token**: Required in the header.
+
+### Request Body
+
+```
 {
-    "name": "Example Company",
-    "industry": "Technology",
-    "mail": "example@company.com",
-    "ceoName": "John Doe",
-    "number": "1234567890",
-    "website": "https://example.com",
-    "size": "500",
-    "foundedIn": 2000,
-    "location": "New York",
-    "gstNumber": "1234GST5678"
+    "name": "<companyName>",
+    "industry": "<industry>",
+    "mail": "<email>",
+    "ceoName": "<CEO Name>",
+    "number": "<contactNumber>",
+    "website": "<websiteUrl>",
+    "size": "<companySize>",
+    "foundedIn": <year>,
+    "location": "<location>",
+    "gstNumber": "<gstNumber>"
 }
 ```
 
-Response:
-Success (201):
-```json
-{
-    "_id": "60f68e1bda3e4b8a8e74c2c1",
-    "name": "Example Company",
-    "industry": "Technology",
-    "mail": "example@company.com",
-    "ceoName": "John Doe",
-    "number": "1234567890",
-    "website": "https://example.com",
-    "size": "500",
-    "foundedIn": 2000,
-    "location": "New York",
-    "gstNumber": "1234GST5678",
-    "createdAt": "2021-08-22T12:34:56.789Z",
-    "updatedAt": "2021-08-22T12:34:56.789Z",
-    "__v": 0
-}
-```
-Error (400):
-```json
-{
-    "error": "Missing required field: name"
-}
-```
+### Response (JSON)
 
-### 2. **Get All Companies**
-- Endpoint: GET /companies
-- Description: Retrieves all companies from the system.
-- Response:
-Success (200):
-```json
-[
-    {
-        "_id": "60f68e1bda3e4b8a8e74c2c1",
-        "name": "Example Company",
-        "industry": "Technology",
-        "mail": "example@company.com",
-        "ceoName": "John Doe",
-        "number": "1234567890",
-        "website": "https://example.com",
-        "size": "500",
-        "foundedIn": 2000,
-        "location": "New York",
-        "gstNumber": "1234GST5678",
-        "createdAt": "2021-08-22T12:34:56.789Z",
-        "updatedAt": "2021-08-22T12:34:56.789Z",
-        "__v": 0
+```
+{
+    "_id": "<companyId>",
+    "name": "<companyName>",
+    "industry": "<industry>",
+    "mail": "<email>",
+    "ceoName": "<CEO Name>",
+    "number": "<contactNumber>",
+    "website": "<websiteUrl>",
+    "size": "<companySize>",
+    "foundedIn": <year>,
+    "location": "<location>",
+    "gstNumber": "<gstNumber>",
+    "logo": "<logoUrl>",
+    "employers": [],
+    "address": {
+        "street": "<street>",
+        "state": "<state>",
+        "zipCode": "<zipCode>",
+        "country": "<country>"
     },
-    {
-        "_id": "60f68e1bda3e4b8a8e74c2c2",
-        "name": "Tech Innovations",
-        "industry": "Software",
-        "mail": "info@techinnovations.com",
-        "ceoName": "Alice Smith",
-        "number": "9876543210",
-        "website": "https://techinnovations.com",
-        "size": "1000",
-        "foundedIn": 2010,
-        "location": "San Francisco",
-        "gstNumber": "9876GST5432",
-        "createdAt": "2021-08-22T12:34:56.789Z",
-        "updatedAt": "2021-08-22T12:34:56.789Z",
-        "__v": 0
-    }
+    "createdAt": "<timestamp>",
+    "updatedAt": "<timestamp>"
+}
+```
+
+### Errors
+
+**Server Error**:
+
+- "An unexpected error occurred. Please try again later."
+
+---
+
+# 2) Get All Companies
+
+### GET METHOD
+
+- **URL**: `/api/company/listall`
+
+### Headers
+
+- **Token**: Required in the header.
+
+### Response (JSON)
+
+```
+[
+  {
+    "_id": "<companyId>",
+    "name": "<companyName>",
+    "industry": "<industry>",
+    "mail": "<email>",
+    "ceoName": "<CEO Name>",
+    "number": "<contactNumber>",
+    "website": "<websiteUrl>",
+    "size": "<companySize>",
+    "foundedIn": <year>,
+    "location": "<location>",
+    "gstNumber": "<gstNumber>",
+    "logo": "<logoUrl>",
+    "employers": [],
+    "address": {
+        "street": "<street>",
+        "state": "<state>",
+        "zipCode": "<zipCode>",
+        "country": "<country>"
+    },
+    "createdAt": "<timestamp>",
+    "updatedAt": "<timestamp>"
+  }
 ]
 ```
 
-### 3. **Get a Specific Company by ID**
-- Endpoint: GET /companies/:id
-- Description: Retrieves details of a specific company by its unique ID.
-- URL Parameters:
+### Errors
 
-id: The unique identifier for the company (e.g., 60f68e1bda3e4b8a8e74c2c1).
-Response:
+**Server Error**:
 
-Success (200):
-```json
+- "An unexpected error occurred. Please try again later."
+
+---
+
+# 3) Get Company by ID
+
+### GET METHOD
+
+- **URL**: `/api/company/list/:id`
+
+### Parameters
+
+- **id** (required): The ID of the company to retrieve.
+
+### Headers
+
+- **Token**: Required in the header.
+
+### Response (JSON)
+
+```
 {
-    "_id": "60f68e1bda3e4b8a8e74c2c1",
-    "name": "Example Company",
-    "industry": "Technology",
-    "mail": "example@company.com",
-    "ceoName": "John Doe",
-    "number": "1234567890",
-    "website": "https://example.com",
-    "size": "500",
-    "foundedIn": 2000,
-    "location": "New York",
-    "gstNumber": "1234GST5678",
-    "createdAt": "2021-08-22T12:34:56.789Z",
-    "updatedAt": "2021-08-22T12:34:56.789Z",
-    "__v": 0
+    "_id": "<companyId>",
+    "name": "<companyName>",
+    "industry": "<industry>",
+    "mail": "<email>",
+    "ceoName": "<CEO Name>",
+    "number": "<contactNumber>",
+    "website": "<websiteUrl>",
+    "size": "<companySize>",
+    "foundedIn": <year>,
+    "location": "<location>",
+    "gstNumber": "<gstNumber>",
+    "logo": "<logoUrl>",
+    "employers": [],
+    "address": {
+        "street": "<street>",
+        "state": "<state>",
+        "zipCode": "<zipCode>",
+        "country": "<country>"
+    },
+    "createdAt": "<timestamp>",
+    "updatedAt": "<timestamp>"
 }
 ```
 
-Error (404):
-```json
+### Errors
+
+**404 - Not Found**:
+
+- "Company not found"
+
+**Server Error**:
+
+- "An unexpected error occurred. Please try again later."
+
+---
+
+# 4) Update Company
+
+### PUT METHOD
+
+- **URL**: `/api/company/update/:id`
+
+### Parameters
+
+- **id** (required): The ID of the company to update.
+
+### Headers
+
+- **Token**: Required in the header.
+
+### Request Body
+
+```
 {
-    "error": "Company not found"
+    "name": "<companyName>",
+    "industry": "<industry>",
+    "mail": "<email>",
+    "ceoName": "<CEO Name>",
+    "number": "<contactNumber>",
+    "website": "<websiteUrl>",
+    "size": "<companySize>",
+    "foundedIn": <year>,
+    "location": "<location>",
+    "gstNumber": "<gstNumber>"
 }
 ```
 
-### 4. **Update Company Details**
-- Endpoint: PUT /companies/:id
-- Description: Updates the details of a specific company by its ID.
-- URL Parameters:
+### Response (JSON)
 
-id: The unique identifier for the company (e.g., 60f68e1bda3e4b8a8e74c2c1).
-Request Payload:
-
-```json
+```
 {
-    "name": "Updated Company Name",
-    "industry": "Updated Industry",
-    "mail": "updated@company.com",
-    "ceoName": "Updated CEO",
-    "number": "1122334455",
-    "website": "https://updatedcompany.com",
-    "size": "800",
-    "foundedIn": 2010,
-    "location": "Los Angeles",
-    "gstNumber": "5678GST1234"
+    "_id": "<companyId>",
+    "name": "<companyName>",
+    "industry": "<industry>",
+    "mail": "<email>",
+    "ceoName": "<CEO Name>",
+    "number": "<contactNumber>",
+    "website": "<websiteUrl>",
+    "size": "<companySize>",
+    "foundedIn": <year>,
+    "location": "<location>",
+    "gstNumber": "<gstNumber>",
+    "logo": "<logoUrl>",
+    "employers": [],
+    "address": {
+        "street": "<street>",
+        "state": "<state>",
+        "zipCode": "<zipCode>",
+        "country": "<country>"
+    },
+    "createdAt": "<timestamp>",
+    "updatedAt": "<timestamp>"
 }
 ```
 
-Response:
-Success (200):
-```json
-{
-    "_id": "60f68e1bda3e4b8a8e74c2c1",
-    "name": "Updated Company Name",
-    "industry": "Updated Industry",
-    "mail": "updated@company.com",
-    "ceoName": "Updated CEO",
-    "number": "1122334455",
-    "website": "https://updatedcompany.com",
-    "size": "800",
-    "foundedIn": 2010,
-    "location": "Los Angeles",
-    "gstNumber": "5678GST1234",
-    "createdAt": "2021-08-22T12:34:56.789Z",
-    "updatedAt": "2021-08-23T15:45:32.123Z",
-    "__v": 0
-}
+### Errors
+
+**404 - Not Found**:
+
+- "Company not found"
+
+**Server Error**:
+
+- "An unexpected error occurred. Please try again later."
+
+---
+# 5) Delete Company
+
+### DELETE METHOD
+
+- **URL**: `/api/company/delete/:id`
+
+### Parameters
+
+- **id** (required): The ID of the company to delete.
+
+### Headers
+
+- **Token**: Required in the header.
+
+### Response (JSON)
+
 ```
-
-Error (404):
-```json
-{
-    "error": "Company not found"
-}
-```
-
-### 5. **Delete a Company**
-- Endpoint: DELETE /companies/:id
-- Description: Deletes a specific company by its ID.
-- URL Parameters:
-
-id: The unique identifier for the company (e.g., 60f68e1bda3e4b8a8e74c2c1).
-Response:
-
-Success (200):
-```json
 {
     "message": "Company deleted successfully"
 }
 ```
 
-Error (404):
-```json
+### Errors
+
+**404 - Not Found**:
+
+- "Company not found"
+
+**Server Error**:
+
+- "An unexpected error occurred. Please try again later."
+
+---
+
+# 6) Add Employer to Company
+
+### PATCH METHOD
+
+- **URL**: `/api/company/addEmployer/:id`
+
+### Parameters
+
+- **id** (required): The ID of the company to update.
+
+### Headers
+
+- **Token**: Required in the header.
+
+### Request Body
+
+```
 {
-    "error": "Company not found"
+    "employer": "<employerId>"
 }
 ```
 
-Error Handling
-If any error occurs, the API will respond with an appropriate HTTP status code and a JSON object containing the error message.
+### Response (JSON)
 
-Example:
-
-```json
+```
 {
-    "error": "Invalid request data"
+    "message": "Employer added successfully",
+    "data": {
+        "_id": "<companyId>",
+        "name": "<companyName>",
+        "industry": "<industry>",
+        "mail": "<email>",
+        "ceoName": "<CEO Name>",
+        "number": "<contactNumber>",
+        "website": "<websiteUrl>",
+        "size": "<companySize>",
+        "foundedIn": <year>,
+        "location": "<location>",
+        "gstNumber": "<gstNumber>",
+        "logo": "<logoUrl>",
+        "employers": ["<employerId>"],
+        "address": {
+            "street": "<street>",
+            "state": "<state>",
+            "zipCode": "<zipCode>",
+            "country": "<country>"
+        },
+        "createdAt": "<timestamp>",
+        "updatedAt": "<timestamp>"
+    }
 }
 ```
+
+### Errors
+
+**404 - Not Found**:
+
+- "Company not found"
+
+**Server Error**:
+
+- "An unexpected error occurred. Please try again later."
+
+---
+
+### Notes:
+- The `verifyTokenMiddleware` ensures that the request is authenticated.
+- The `isAdmin` middleware ensures that the user has admin privileges when performing certain actions like deleting or adding employers.
+- The `isVerifiedEmployer` middleware ensures that only verified employers can create new companies.
