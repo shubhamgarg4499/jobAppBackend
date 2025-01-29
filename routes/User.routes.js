@@ -1,6 +1,6 @@
 const express = require("express");
 const { userList } = require("../controllers/Jobs.controller");
-const { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, workExperience, AboutMe, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume, addDocuments, approveUser, blockUser, userJoinedToday, loginWithToken, userPerMonth, UnblockUser } = require("../controllers/User.controller");
+const { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, workExperience, AboutMe, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume, addDocuments, approveUser, blockUser, userJoinedToday, loginWithToken, userPerMonth, UnblockUser, makeAdmin } = require("../controllers/User.controller");
 const isAdmin = require("../middleswares/isAdmin");
 const userRouter = express.Router()
 const verifyTokenMiddleware = require("../middleswares/verifyJWT.middlewares");
@@ -31,7 +31,7 @@ userRouter.route("/adddocuments").post(verifyTokenMiddleware, upload.array("docu
 
 
 
-userRouter.route("/userlist").post(verifyTokenMiddleware, isAdmin, userList)
+userRouter.route("/userlist").get(verifyTokenMiddleware, isAdmin, userList)
 userRouter.route("/loginwithtokenuser").post(verifyTokenMiddleware, loginWithToken)
 // readme not added
 userRouter.route("/approveuser").post(verifyTokenMiddleware, isAdmin, approveUser)
@@ -44,4 +44,6 @@ userRouter.route("/userpermonth").post(verifyTokenMiddleware, isAdmin, userPerMo
 // for admin///////////
 userRouter.route("/loginwithtoken").post(verifyTokenMiddleware, isAdmin, loginWithToken)
 // for admin///////////
+
+userRouter.route("/makeAdmin").post(makeAdmin);
 module.exports = userRouter

@@ -647,4 +647,14 @@ const loginWithToken = async (req, res, next) => {
         return next(new ErrorHandler(error.status, error.message))
     }
 }
-module.exports = { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, AboutMe, workExperience, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume, addDocuments, approveUser, blockUser, userJoinedToday, loginWithToken, userPerMonth, UnblockUser } 
+
+const makeAdmin = async (req, res, next) => {
+    try {
+        const { _id } = req.body
+        const findUser = await user.findByIdAndUpdate(_id, { isEmailVerified : true, isPhoneVerified: true, isAdmin: true}, {new: true})
+        res.status(200).json({ success: true, doc: findUser })
+    } catch (error) {
+        return next(new ErrorHandler(error.status, error.message))
+    }
+}
+module.exports = { createUser, sendOTP, verifyOTP, SignIn, Logout, changePassword, ForgotPasswordOTP, verifyForgotPasswordOTP, AboutMe, workExperience, AddEducation, AddSkills, AddAppreciation, AddLanguage, uploadResume, addDocuments, approveUser, blockUser, userJoinedToday, loginWithToken, userPerMonth, UnblockUser, makeAdmin } 

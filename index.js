@@ -42,8 +42,17 @@ app.use('/api/user', userRouter)
 const jobRouter = require("./routes/Job.routes")
 app.use("/api/job", jobRouter)
 
+// company routes
+const companyRouter = require("./routes/Company.routes")
+app.use("/api/company", companyRouter)
 
+// post routes
+const postRouter = require("./routes/Post.routes")
+app.use("/api/post", postRouter)
 
+// application routes
+const applicationRouter = require("./routes/Application.route")
+app.use("/api/application", applicationRouter)
 
 function getLocalIPAddress() {
     const interfaces = os.networkInterfaces();
@@ -63,8 +72,9 @@ const localIP = getLocalIPAddress();
 const port = process.env.PORT || 5000
 app.listen(port, () => {
     // Complete URL (protocol + IP address + port)
-    const completeURL = `http://${localIP}:${port}`;
-    console.log('Complete url: ', completeURL);
+    // const completeURL = `http://${localIP}:${port}`;
+    // console.log('Complete url: ', completeURL);
+    console.log(`Server running on: http://localhost:${port}`)
 })
 
 app.use(ErrorMiddleware)
