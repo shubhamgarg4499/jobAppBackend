@@ -68,6 +68,10 @@ const companySchema = new mongoose.Schema({
         ref: "User",
     }],
     address: address,
+    approved: {
+        type: Boolean,
+        default: false
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Company', companySchema);
