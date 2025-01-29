@@ -1,7 +1,7 @@
 let mongoose = require('mongoose');
 
 let jobSchema = new mongoose.Schema({
-    user: {
+    postedBy: {
         type: mongoose.Types.ObjectId,
         ref: "user"
     },
@@ -55,8 +55,7 @@ let jobSchema = new mongoose.Schema({
         type: String,
         enum: ["active", "inactive"],
         default: "active"
-    }
-
+    },
 }, { timestamps: true })
 
 let job = mongoose.model("job", jobSchema)

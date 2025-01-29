@@ -27,6 +27,7 @@ const createJob = async (req, res, next) => {
         return next(new ErrorHandler(error.status, error.message))
     }
 }
+
 const createGovtJobs = async (req, res, next) => {
     try {
         const { _id } = req.user

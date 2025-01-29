@@ -4,7 +4,8 @@ const {
     getAllCompanies,
     getCompanyById,
     updateCompany,
-    deleteCompany
+    deleteCompany,
+    addEmployer
 } = require('../controllers/Company.controller');
 
 const verifyTokenMiddleware = require('../middleswares/verifyJWT.middlewares');
@@ -26,5 +27,8 @@ companyRouter.put('/update/:id', verifyTokenMiddleware, isAdmin, updateCompany);
 
 // Delete a company
 companyRouter.delete('/delete/:id', verifyTokenMiddleware, isAdmin, deleteCompany);
+
+// Add Employer
+companyRouter.patch('/addEmployer/:id', verifyTokenMiddleware, isAdmin, addEmployer);
 
 module.exports = companyRouter;
