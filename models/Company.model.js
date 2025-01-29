@@ -21,7 +21,7 @@ const companySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    industry: {  
+    industry: {
         type: String,
         required: true
     },
@@ -34,15 +34,15 @@ const companySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    number: { 
+    number: {
         type: String,
         required: true
     },
-    website: { 
+    website: {
         type: String,
         required: true
     },
-    size: { 
+    size: {
         type: String,
         required: true
     },
@@ -63,7 +63,15 @@ const companySchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    employers: [{
+        type: mongoose.Types.ObjectId,
+        ref: "User",
+    }],
     address: address,
+    approved: {
+        type: Boolean,
+        default: false
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Company', companySchema);

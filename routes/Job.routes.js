@@ -2,9 +2,10 @@ const express = require('express')
 const { createJob, getJob, applicationApprovalList, jobsPerMonth, jobsPerDay, ActivejobsPerDay, deleteJobById, createGovtJobs, getGovtJob, deleteGovtJobById, activeInactiveGovtJob, totalNumberOfActiveJobs } = require('../controllers/Jobs.controller')
 const isAdmin = require('../middleswares/isAdmin')
 const verifyTokenMiddleware = require('../middleswares/verifyJWT.middlewares')
+const { isAuthorizedEmployer } = require('../middleswares/isAuthorizedEmployer.middleware')
 const jobRouter = express.Router()
 
-jobRouter.route("/createJob").post(verifyTokenMiddleware, createJob)
+jobRouter.route("/createJob").post(verifyTokenMiddleware, isAuthorizedEmployer, createJob)
 jobRouter.route("/getJob").get(verifyTokenMiddleware, getJob)
 jobRouter.route("/govt-jobs").get(verifyTokenMiddleware, getGovtJob)
 

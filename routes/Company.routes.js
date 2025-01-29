@@ -4,16 +4,18 @@ const {
     getAllCompanies,
     getCompanyById,
     updateCompany,
-    deleteCompany
+    deleteCompany,
+    addEmployer
 } = require('../controllers/Company.controller');
 
 const verifyTokenMiddleware = require('../middleswares/verifyJWT.middlewares');
 const isAdmin = require('../middleswares/isAdmin');
+const isVerifiedEmployer = require('../middleswares/isVerifiedEmployer');
 
 const companyRouter = express.Router();
 
 // Create a new company
-companyRouter.post('/create', verifyTokenMiddleware, isAdmin, createCompany);
+companyRouter.post('/create', verifyTokenMiddleware, isVerifiedEmployer, createCompany);
 
 // Get all companies
 companyRouter.get('/listall', verifyTokenMiddleware, getAllCompanies);
@@ -22,9 +24,12 @@ companyRouter.get('/listall', verifyTokenMiddleware, getAllCompanies);
 companyRouter.get('/list/:id', verifyTokenMiddleware, getCompanyById);
 
 // Update company details
-companyRouter.put('/update/:id', verifyTokenMiddleware, isAdmin, updateCompany);
+companyRouter.put('/update/:id', verifyTokenMiddleware, updateCompany);
 
 // Delete a company
 companyRouter.delete('/delete/:id', verifyTokenMiddleware, isAdmin, deleteCompany);
+
+// Add Employer
+companyRouter.patch('/addEmployer/:id', verifyTokenMiddleware, isAdmin, addEmployer);
 
 module.exports = companyRouter;
