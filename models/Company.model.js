@@ -71,6 +71,10 @@ const companySchema = new mongoose.Schema({
     approved: {
         type: Boolean,
         default: false
+    },
+    aboutCompany: {
+        type: String,
+        default: null
     }
 }, { timestamps: true });
 

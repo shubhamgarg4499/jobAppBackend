@@ -11,11 +11,12 @@ const {
 const verifyTokenMiddleware = require('../middleswares/verifyJWT.middlewares');
 const isAdmin = require('../middleswares/isAdmin');
 const isVerifiedEmployer = require('../middleswares/isVerifiedEmployer');
+const { uploadLogo, upload } = require('../middleswares/imageUpload.middleware');
 
 const companyRouter = express.Router();
 
 // Create a new company
-companyRouter.post('/create', verifyTokenMiddleware, isVerifiedEmployer, createCompany);
+companyRouter.post('/create', verifyTokenMiddleware, isVerifiedEmployer,  upload.single("logo"), uploadLogo, createCompany);
 
 // Get all companies
 companyRouter.get('/listall', verifyTokenMiddleware, getAllCompanies);
