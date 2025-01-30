@@ -13,7 +13,8 @@ exports.createCompany = async (req, res) => {
             foundedIn: req.body.foundedIn,
             location: req.body.location,
             gstNumber: req.body.gstNumber,
-            logo: req.body.logo
+            logo: req.body.logo,
+            aboutCompany: req.body.aboutCompany
         });
         const savedCompany = await company.save();
         res.status(201).json(savedCompany);

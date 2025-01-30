@@ -22,7 +22,7 @@ exports.uploadLogo = (req, res, next) => {
 
         next();
     } catch (error) {
-        return next(new ErrorHandler(500, "Failed to process the uploaded file."));
+        return next(new ErrorHandler(500, "Failed to process the uploaded file."+error));
     }
 };
 
