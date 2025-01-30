@@ -9,8 +9,11 @@ const createJob = async (req, res, next) => {
         const { _id } = req.user
         const { jobPosition, workplace, location, company, type, salaryFrom = "Not Disclosed", salaryTo = "Not Disclosed", category, lastDate = "", description, qualification } = req?.body;
 
-        if ([jobPosition, workplace, location, company, type, category, description].some(e => e.trim() === "")) {
-            return next(new ErrorHandler(400, "jobPosition, workplace, location, company, type, category are required"));
+        if (!mongoose.Types.ObjectId.isValid(company))
+            return next(new ErrorHandler(400, "Company should be id"));
+
+        if ([jobPosition, workplace, location, type, category, description].some(e => e.trim() === "")) {
+            return next(new ErrorHandler(400, "jobPosition, workplace, location, type, category are required"));
         }
         if (typeof qualification !== "object") {
             return next(new ErrorHandler(400, "Only Array Allowed in Qualification"))
