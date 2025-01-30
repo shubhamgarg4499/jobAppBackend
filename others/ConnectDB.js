@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const ErrorHandler = require('./ErrorHandler.class');
 require("dotenv").config()
 //Set up default mongoose connection
-const mongoDB_Url_ATLAS = process.env.MONGODB_URL;
+const mongoDB_Url_ATLAS = process.env.MONGODB_URL_ATLAS;
 const mongoDB_Url_LOCAL = process.env.MONGODB_URL;
 
 async function connectDB() {
