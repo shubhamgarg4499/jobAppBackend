@@ -1,9 +1,13 @@
 const CompanyModel = require('../models/Company.model');
 const { job } = require('../models/Jobs.model');
+const user = require('../models/User.models');
 const ErrorHandler = require('../others/ErrorHandler.class');
 
-exports.createCompany = async (req, res) => {
+exports.createCompany = async (req, res, next) => {
     try {
+        const { _id } = req.user;
+        const userId = _id.toString();
+
         const company = new CompanyModel({
             name: req.body.name,
             industry: req.body.industry,
@@ -16,9 +20,26 @@ exports.createCompany = async (req, res) => {
             location: req.body.location,
             gstNumber: req.body.gstNumber,
             logo: req.body.logo,
-            aboutCompany: req.body.aboutCompany
+            aboutCompany: req.body.aboutCompany,
+            employer: userId
         });
         const savedCompany = await company.save();
+
+        if (savedCompany) {
+            const updatedUser = await user.findByIdAndUpdate(
+                
+                _id,
+                { hasCompany: true },  // Update the `hasCompany` field to true
+                { new: true }  // Return the updated user document (optional)
+            );
+
+            res.status(201).json({
+                message: "Company created successfully and user updated",
+                company: savedCompany,
+                user: updatedUser
+            });
+        }
+
         res.status(201).json(savedCompany);
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -63,10 +63,10 @@ const companySchema = new mongoose.Schema({
         type: String,
         default: null,
     },
-    employers: [{
+    employer: {
         type: mongoose.Types.ObjectId,
         ref: "User",
-    }],
+    },
     address: address,
     approved: {
         type: Boolean,
