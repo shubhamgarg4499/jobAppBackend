@@ -28,7 +28,7 @@ exports.createCompany = async (req, res, next) => {
         if (savedCompany) {
             const updatedUser = await user.findByIdAndUpdate(
                 
-                _id,  // Filter by the user ID
+                _id,
                 { hasCompany: true },  // Update the `hasCompany` field to true
                 { new: true }  // Return the updated user document (optional)
             );
