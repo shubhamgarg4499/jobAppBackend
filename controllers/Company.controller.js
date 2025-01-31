@@ -69,18 +69,18 @@ exports.getCompanyJobs = async (req, res) => {
     }
 };
 
-exports.getCurrentEmployerCompany = async (req, res) => {
+exports.getCurrentEmployerCompany = async (req, res, next) => {
     try {
         const { _id } = req.user;
         const userId = _id.toString();
-
+        console.log('User id during get current employer company',userId);
         const companies = await CompanyModel.find({
             employers: { $in: [userId] }
         })
         // .populate('employers') 
 
-        if (!companies.length) {
-            return (new ErrorHandler(404, "No companies found where you are an employer"));
+        if (companies.length===0) {
+            return next(new ErrorHandler(404, "No companies found where you are an employer"));
         }
 
         res.status(200).json({
