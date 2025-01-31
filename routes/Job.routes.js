@@ -1,5 +1,5 @@
 const express = require('express')
-const { createJob, getJob, applicationApprovalList, jobsPerMonth, jobsPerDay, ActivejobsPerDay, deleteJobById, createGovtJobs, getGovtJob, deleteGovtJobById, activeInactiveGovtJob, totalNumberOfActiveJobs } = require('../controllers/Jobs.controller')
+const { createJob, getJob, applicationApprovalList, jobsPerMonth, jobsPerDay, ActivejobsPerDay, deleteJobById, createGovtJobs, getGovtJob, deleteGovtJobById, activeInactiveGovtJob, totalNumberOfActiveJobs, getAllApplications } = require('../controllers/Jobs.controller')
 const isAdmin = require('../middleswares/isAdmin')
 const verifyTokenMiddleware = require('../middleswares/verifyJWT.middlewares')
 const { isAuthorizedEmployer } = require('../middleswares/isAuthorizedEmployer.middleware')
@@ -18,6 +18,8 @@ jobRouter.route("/deletegovtjobbyid").delete(verifyTokenMiddleware, isAdmin, del
 jobRouter.route("/activeinactivegovtjob").post(verifyTokenMiddleware, isAdmin, activeInactiveGovtJob)
 jobRouter.route("/creategovtjobs").post(verifyTokenMiddleware, isAdmin, createGovtJobs)
 jobRouter.route("/totalNumberOfActiveJobs").get(verifyTokenMiddleware, totalNumberOfActiveJobs)
+
+jobRouter.route("/getApplications/:jobId").get(verifyTokenMiddleware, getAllApplications)
 
 
 module.exports = jobRouter

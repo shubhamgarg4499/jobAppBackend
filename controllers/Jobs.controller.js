@@ -1,7 +1,8 @@
-const { job, govtJobs } = require("../models/Jobs.model");
+const { job, govtJobs } = require("../models/Jobs.model")
 const user = require("../models/User.models");
 const ErrorHandler = require("../others/ErrorHandler.class");
 const mongoose = require("mongoose");
+const ApplicationModel = require("../models/Application.model");
 
 
 const createJob = async (req, res, next) => {
@@ -9,6 +10,7 @@ const createJob = async (req, res, next) => {
         const { _id } = req.user
         const { jobPosition, workplace, location, company, type, salaryFrom = "Not Disclosed", salaryTo = "Not Disclosed", category, lastDate = "", description, qualification } = req?.body;
 
+        console.log(typeof(company));
         if (!mongoose.Types.ObjectId.isValid(company))
             return next(new ErrorHandler(400, "Company should be id"));
 
@@ -487,5 +489,32 @@ const totalNumberOfActiveJobs = async (req, res, next) => {  // only private,ngo
     }
 }
 
+const getAllApplications = async (req, res, next) => {
+    try {
+        const { jobId } = req.params;
 
-module.exports = { createJob, getJob, applicationApprovalList, userList, jobsPerMonth, jobsPerDay, ActivejobsPerDay, deleteJobById, createGovtJobs, getGovtJob, deleteGovtJobById, activeInactiveGovtJob, totalNumberOfActiveJobs }
+        if (!jobId) {
+            return next(new ErrorHandler(400, "Job ID is required"));
+        }
+
+        const applications = await ApplicationModel.find({ jobid: jobId })
+            .populate('user', 'skills experience education documents')
+            .lean()
+            .exec();
+
+        if (!applications.length) {
+            return next(new ErrorHandler(404, "No applications found for this job"));
+        }
+
+        res.status(200).json({
+            success: true,
+            count: applications.length,
+            applications
+        });
+    } catch (err) {
+        // Pass error to error handling middleware
+        return next(new ErrorHandler(500, err.message));
+    }
+};
+
+module.exports = { createJob, getJob, applicationApprovalList, userList, jobsPerMonth, jobsPerDay, ActivejobsPerDay, deleteJobById, createGovtJobs, getGovtJob, deleteGovtJobById, activeInactiveGovtJob, totalNumberOfActiveJobs, getAllApplications }

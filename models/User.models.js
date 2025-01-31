@@ -218,6 +218,10 @@ const userSchema = new mongoose.Schema({
     isBlocked: {
         type: Boolean,
         default: false
+    },
+    hasCompany: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 
