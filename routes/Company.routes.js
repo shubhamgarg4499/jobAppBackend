@@ -5,7 +5,9 @@ const {
     getCompanyById,
     updateCompany,
     deleteCompany,
-    addEmployer
+    addEmployer,
+    getCompanyJobs,
+    getCurrentEmployerCompany
 } = require('../controllers/Company.controller');
 
 const verifyTokenMiddleware = require('../middleswares/verifyJWT.middlewares');
@@ -23,6 +25,10 @@ companyRouter.get('/listall', verifyTokenMiddleware, getAllCompanies);
 
 // Get a specific company by ID
 companyRouter.get('/list/:id', verifyTokenMiddleware, getCompanyById);
+
+companyRouter.get("/listCompanyJobs/:id", verifyTokenMiddleware, getCompanyJobs);
+
+companyRouter.get('/getCurrentEmployerCompany', verifyTokenMiddleware, getCurrentEmployerCompany);
 
 // Update company details
 companyRouter.put('/update/:id', verifyTokenMiddleware, updateCompany);

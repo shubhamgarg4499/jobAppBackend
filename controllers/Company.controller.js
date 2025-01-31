@@ -1,4 +1,6 @@
-const CompanyModel = require('../models/Company.model')
+const CompanyModel = require('../models/Company.model');
+const { job } = require('../models/Jobs.model');
+const ErrorHandler = require('../others/ErrorHandler.class');
 
 exports.createCompany = async (req, res) => {
     try {
@@ -41,6 +43,51 @@ exports.getCompanyById = async (req, res) => {
             return res.status(404).json({ error: 'Company not found' });
         }
         res.status(200).json(company);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Update 
+exports.getCompanyJobs = async (req, res) => {
+    try {
+        const company = await CompanyModel.findById(req.params.id);
+
+        if (!company) {
+            return res.status(404).json({ error: 'Company not found' });
+        }
+
+        const jobs = await job.find({ company: company._id });
+
+        if (jobs.length === 0) {
+            return res.status(404).json({ error: 'No jobs found for this company' });
+        }
+
+        res.status(200).json(jobs);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.getCurrentEmployerCompany = async (req, res) => {
+    try {
+        const { _id } = req.user;
+        const userId = _id.toString();
+
+        const companies = await CompanyModel.find({
+            employers: { $in: [userId] }
+        })
+        // .populate('employers') 
+
+        if (!companies.length) {
+            return (new ErrorHandler(404, "No companies found where you are an employer"));
+        }
+
+        res.status(200).json({
+            success: true,
+            count: companies.length,
+            companies
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -92,7 +139,7 @@ exports.addEmployer = async (req, res) => {
     try {
         const { id } = req.params;
         const { employer } = req.body;
-        
+
         // $addToSet to add the employer 
         const updatedCompany = await CompanyModel.findByIdAndUpdate(
             id,
