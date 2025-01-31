@@ -54,111 +54,172 @@ const createGovtJobs = async (req, res, next) => {
 // filteration
 const getJob = async (req, res, next) => {
     try {
-        const { jobId, title, company, Location, status, salaryFrom, limit, page, workplace, category } = req?.query
-        // console.log(typeof salaryFrom);
-        let aggregatePipeline = []
-        let skip = ((page - 1) * limit)
+        const { 
+            jobId, 
+            title, 
+            company, 
+            Location, 
+            status, 
+            salaryFrom, 
+            limit, 
+            page, 
+            workplace, 
+            category,
+            sortBy = 'createdAt',
+            sortOrder = -1,        // -1 for descending (recent first), 1 for ascending
+            position
+        } = req?.query;
+
+        let aggregatePipeline = [];
+        let skip = ((page - 1) * limit);
+
         if (limit > 30) {
-            return next(new ErrorHandler(400, "Can't give more than 30 Jobs Data At Once It can Cause App Crash! Change the page to get more Data"))
+            return next(new ErrorHandler(400, "Can't give more than 30 Jobs Data At Once It can Cause App Crash! Change the page to get more Data"));
         }
+
         if (jobId) {
             aggregatePipeline.push({
                 $match: {
                     _id: new mongoose.Types.ObjectId(jobId)
                 }
-            })
+            });
         }
+
+        if (position) {
+            aggregatePipeline.push({
+                $match: {
+                    jobPosition: { $regex: position, $options: "i" }
+                }
+            });
+        }
+
         if (workplace) {
             aggregatePipeline.push({
                 $match: {
                     jobWorkplace: { $regex: workplace, $options: "i" }
                 }
-            })
+            });
         }
+
         if (category) {
             aggregatePipeline.push({
                 $match: {
                     category: { $regex: category, $options: "i" }
                 }
-            })
+            });
         }
+
         if (title) {
             aggregatePipeline.push({
                 $match: {
                     jobPosition: { $regex: title, $options: "i" }
                 }
-            })
+            });
         }
+
         if (company) {
             aggregatePipeline.push({
                 $match: {
                     company: { $regex: company, $options: "i" }
                 }
-            })
+            });
         }
+
         if (Location) {
             aggregatePipeline.push({
                 $match: {
                     jobLocation: { $regex: Location, $options: "i" }
                 }
-            })
+            });
         }
+
         if (status) {
             aggregatePipeline.push({
                 $match: {
                     jobStatus: { $regex: status, $options: "i" }
                 }
-            })
+            });
         }
+
         if (salaryFrom) {
             aggregatePipeline.push({
                 $match: {
-                    salaryFrom: { $gte: salaryFrom }  // Correct usage of $gte inside $match
+                    salaryFrom: { $gte: Number(salaryFrom) }
                 }
             });
         }
-        aggregatePipeline.push(
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "user",
-                    foreignField: "_id",
-                    as: "user",
-                    pipeline: [{
-                        $project: {
-                            fullName: 1,
-                            email: 1,
-                            profile_picture: 1,
-                        }
-                    }]
-                },
-            },)
 
+        aggregatePipeline.push({
+            $sort: {
+                [sortBy]: Number(sortOrder)
+            }
+        });
+
+        // User lookup
+        aggregatePipeline.push({
+            $lookup: {
+                from: "users",
+                localField: "user",
+                foreignField: "_id",
+                as: "user",
+                pipeline: [{
+                    $project: {
+                        fullName: 1,
+                        email: 1,
+                        profile_picture: 1,
+                    }
+                }]
+            }
+        });
+
+        // Add count stage before pagination
+        const countPipeline = [...aggregatePipeline];
+        countPipeline.push({
+            $count: "totalJobs"
+        });
+
+        // Pagination
         if (skip) {
             aggregatePipeline.push({
                 $skip: Number(skip)
-            })
+            });
         }
+
         if (limit) {
             aggregatePipeline.push({
                 $limit: Number(limit)
-            })
+            });
         }
-        const findedJob = await job.aggregate(aggregatePipeline)
-        // [
-        //     {
-        //         $match: {
-        //             _id: new mongoose.Types.ObjectId(jobId)
-        //         }
-        //     }
-        // ]
-        res.send(findedJob)
+
+        const [findedJob, [countResult]] = await Promise.all([
+            job.aggregate(aggregatePipeline),
+            job.aggregate(countPipeline)
+        ]);
+
+        res.status(200).json({
+            success: true,
+            totalJobs: countResult?.totalJobs || 0,
+            currentPage: page ? Number(page) : 1,
+            totalPages: countResult ? Math.ceil(countResult.totalJobs / limit) : 0,
+            jobs: findedJob
+        });
 
     } catch (error) {
-        return next(new ErrorHandler(error.status, error.message))
+        return next(new ErrorHandler(error.status || 500, error.message));
     }
-}
+};
 
+const getJobById = async (req, res) => {
+    try {
+        const foundJob = await job.findById(req.params.id);
+        if (!foundJob) {
+            return res.status(404).json({ error: 'Job not found' });
+        }
+        res.status(200).json(foundJob);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
 const getGovtJob = async (req, res, next) => {
     try {
@@ -517,4 +578,4 @@ const getAllApplications = async (req, res, next) => {
     }
 };
 
-module.exports = { createJob, getJob, applicationApprovalList, userList, jobsPerMonth, jobsPerDay, ActivejobsPerDay, deleteJobById, createGovtJobs, getGovtJob, deleteGovtJobById, activeInactiveGovtJob, totalNumberOfActiveJobs, getAllApplications }
+module.exports = { createJob, getJob, applicationApprovalList, userList, jobsPerMonth, jobsPerDay, ActivejobsPerDay, deleteJobById, createGovtJobs, getGovtJob, deleteGovtJobById, activeInactiveGovtJob, totalNumberOfActiveJobs, getAllApplications, getJobById }
